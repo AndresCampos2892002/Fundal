@@ -1,0 +1,144 @@
+/* Estilos generales y de tipografía */
+body {
+  background-color: #f0f2f5; /* Fondo suavemente gris */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+/* Contenedor principal de la página */
+.main-card {
+  background-color: #ffffff;
+  padding: 2.5rem;
+  border-radius: 1.25rem; /* Esquinas más redondeadas */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* Sombra suave */
+}
+
+/* Estilos de tabla modernos */
+.table {
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); /* Sombra sutil para la tabla */
+  border: 1px solid #dee2e6; /* Borde sutil */
+}
+
+.table thead {
+  background-color: #1d3557; /* Un color de cabecera profesional */
+  color: white;
+  border-bottom: none;
+}
+
+.table th {
+  padding: 1.2rem;
+  font-weight: 600;
+  border-bottom: none !important;
+}
+
+.table td {
+  padding: 1rem 1.2rem;
+  border-top: 1px solid #dee2e6;
+}
+
+.table tbody tr:hover {
+  background-color: #f8f9fa; /* Efecto hover más sutil */
+
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Estilos para badges (estados) */
+.badge {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.5em 0.8em;
+  border-radius: 1rem;
+}
+
+.badge.bg-success {
+  background: linear-gradient(45deg, #28a745, #218838) !important;
+  box-shadow: 0 2px 6px rgba(40, 167, 69, 0.2);
+}
+
+.badge.bg-danger {
+  background: linear-gradient(45deg, #dc3545, #c82333) !important;
+  box-shadow: 0 2px 6px rgba(220, 53, 69, 0.2);
+}
+
+.badge.bg-secondary {
+  background: linear-gradient(45deg, #6c757d, #5a6268) !important;
+  box-shadow: 0 2px 6px rgba(108, 117, 125, 0.2);
+}
+
+/* Estilos de botones con gradiente y sombra */
+.btn-sm.btn-warning, .btn.btn-success {
+  border-radius: 2rem;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn.btn-success {
+  background: linear-gradient(45deg, #28a745, #218838);
+  border: none;
+  box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
+}
+
+.btn.btn-success:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(40, 167, 69, 0.3);
+}
+
+.btn-sm.btn-warning {
+  background: linear-gradient(45deg, #ffc107, #e0a800);
+  border: none;
+  color: white;
+  box-shadow: 0 4px 10px rgba(255, 193, 7, 0.2);
+}
+
+.btn-sm.btn-warning:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(255, 193, 7, 0.3);
+}
+
+.btn-sm.btn-danger {
+  background: linear-gradient(45deg, #dc3545, #c82333);
+  border: none;
+  color: white;
+  box-shadow: 0 4px 10px rgba(220, 53, 69, 0.2);
+}
+
+.btn-sm.btn-danger:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(220, 53, 69, 0.3);
+}
+
+.btn-sm.btn-primary {
+  background: linear-gradient(45deg, #007bff, #0056b3);
+  border: none;
+  color: white;
+  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+}
+
+.btn-sm.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 123, 255, 0.3);
+}
+
+/* Estilos de modales */
+.modal-content {
+  border-radius: 1.5rem;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+
+.modal-header.bg-success {
+  background-color: #28a745 !important;
+  border-top-left-radius: 1.5rem;
+  border-top-right-radius: 1.5rem;
+}
+
+.modal-header.bg-warning {
+  background-color: #ffc107 !important;
+  border-top-left-radius: 1.5rem;
+  border-top-right-radius: 1.5rem;
+}
+
+.btn-close.btn-close-white {
+  filter: brightness(0) invert(1);
+}

@@ -1,0 +1,45 @@
+<nav class="navbar navbar-expand-lg navbar-dark navbar">
+  <div class="container-fluid">
+   <a class="navbar-brand d-flex align-items-center" href=
+   "<% if (user.rol === 'Directivo') { %>
+       /dashboard-directivo
+     <% } else if (user.rol === 'Secretaria') { %>
+       /dashboard-secretaria
+     <% } else { %>
+       /
+     <% } %>">
+       <span class="fs-4 me-2"></span>FUNDAL
+   </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarFundal" aria-controls="navbarFundal" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarFundal">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+        <% if (user.rol === 'Directivo') { %>
+          <li class="nav-item">
+            <a class="nav-link" href="/usuarios">Administrar Usuarios</a>
+          </li>
+        <% } %>
+
+        <li class="nav-item">
+          <a class="nav-link" href="/postulaciones">Postulaciones</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="/crear-nino">Crear Nuevo Niño</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="/expedientes">Ver Expedientes</a>
+        </li>
+
+      </ul>
+      <span class="navbar-text me-3 text-white-50">
+        Bienvenido, <%= user.username %>
+      </span>
+      <a class="btn btn-outline-light" href="/logout">Cerrar Sesión</a>
+    </div>
+  </div>
+</nav>

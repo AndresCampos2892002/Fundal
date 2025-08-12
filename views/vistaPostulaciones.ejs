@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Postulaciones – Primer Ingreso</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/css/postulaciones.css" rel="stylesheet">
+  <link href="/css/navbarStyles.css" rel="stylesheet">
+</head>
+<body>
+  <%- include('navbar') %>
+
+  <div class="container mt-5">
+    <h2 class="mb-4">Postulaciones – Primer Ingreso</h2>
+
+    <% if (success_msg) { %>
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <%= success_msg %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    <% } %>
+    <% if (error_msg) { %>
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <%= error_msg %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    <% } %>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <% if (user && (user.rol === 'Secretaria' || user.rol === 'Directivo')) { %>
+              <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalCrear">
+                 Nueva Postulación
+              </button>
+            <a href="/postulaciones/exportar-excel" class="btn btn-info">
+                        <i class="fas fa-file-excel"></i> Exportar a Excel
+                      </a>
+            <% } %>
+            <form class="d-flex" action="/postulaciones" method="GET">
+              <input class="form-control me-2" type="search" placeholder="Buscar por nombre" aria-label="Search" name="nombre" value="<%= nombreBusqueda %>">
+              <button class="btn btn-outline-primary" type="submit">Buscar</button>
+            </form>
+        </div>
+
+    <div class="table-responsive">
+      <table class="table table-striped align-middle">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nombre niño</th>
+            <th>Fecha nac.</th>
+            <th>Edad</th>
+            <th>Madre</th>
+            <th>Padre</th>
+            <th>Teléfono</th>
+            <th>Visita</th>
+            <th>Estado</th>
+            <th>Apoyos</th>
+            <th>Obs.</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% postulaciones.forEach(p => { %>
+            <tr>
+              <td><%= p.id %></td>
+              <td><strong><%= p["nombre_niño"] %></strong></td>
+              <td><%= p.fecha_nacimiento ? new Date(p.fecha_nacimiento).toLocaleDateString() : '' %></td>
+              <td><%= p.edad || '' %></td>
+              <td><%= p.nombre_madre || '' %></td>
+              <td><%= p.nombre_padre || '' %></td>
+              <td><%= p.telefono || '' %> <%= p.telefono_padre ? (' / ' + p.telefono_padre) : '' %></td>
+              <td><%= p.fecha_visita ? new Date(p.fecha_visita).toLocaleDateString() : '' %></td>
+              <td>
+                <span class="badge <%= p.estado === 'APROBADA' ? 'bg-success' : (p.estado === 'RECHAZADA' ? 'bg-danger':'bg-secondary') %>">
+                  <%= p.estado %>
+                </span>
+              </td>
+              <td>
+                <small>
+                  Aud: <%= p.dificultad_auditiva ? 'Sí' : 'No' %>,
+                  Vis: <%= p.dificultad_visual ? 'Sí' : 'No' %><br>
+                  <%= p.tipo_apoyo || '' %>
+                </small>
+              </td>
+              <td><small><%= p.observaciones || '' %></small></td>
+              <td>
+                <% if (user && (user.rol === 'Secretaria' || user.rol === 'Directivo')) { %>
+                  <button class="btn btn-sm btn-warning"
+                          data-bs-toggle="modal"
+                          data-bs-target="#modalEditar"
+                          data-id="<%= p.id %>"
+                          data-visita="<%= p.fecha_visita ? p.fecha_visita.toISOString().slice(0,10) : '' %>"
+                          data-medcom="<%= p.medio_comunicacion || '' %>"
+                          data-nombre="<%= p['nombre_niño'] %>"
+                          data-nac="<%= p.fecha_nacimiento ? p.fecha_nacimiento.toISOString().slice(0,10) : '' %>"
+                          data-edad="<%= p.edad || '' %>"
+                          data-dir="<%= (p.direccion || '').replace(/"/g,'&quot;') %>"
+                          data-madre="<%= p.nombre_madre || '' %>"
+                          data-padre="<%= p.nombre_padre || '' %>"
+                          data-tel="<%= p.telefono || '' %>"
+                          data-telpadre="<%= p.telefono_padre || '' %>"
+                          data-aud="<%= p.dificultad_auditiva %>"
+                          data-vis="<%= p.dificultad_visual %>"
+                          data-apoyo="<%= (p.tipo_apoyo || '').replace(/"/g,'&quot;') %>"
+                          data-ref="<%= p.referido_por || '' %>"
+                          data-atendido="<%= p.atendido_por || '' %>"
+                          data-prog="<%= p.programa_asignado || '' %>"
+                          data-notseg="<%= (p.notas_seguimiento || '').replace(/"/g,'&quot;') %>"
+                          data-conc="<%= (p.conclusiones || '').replace(/"/g,'&quot;') %>"
+                          data-grado="<%= p.grado || '' %>"
+                          data-obs="<%= (p.observaciones || '').replace(/"/g,'&quot;') %>"
+                          data-estado="<%= p.estado || 'PENDIENTE' %>"
+                          data-diagn="<%= (p.diagnostico || '').replace(/"/g,'&quot;') %>">
+                    Editar
+                  </button>
+                <% } %>
+
+                <% if (user && user.rol === 'Directivo') { %>
+                  <form action="/postulaciones/estado/<%= p.id %>" method="POST" class="d-inline-block mt-1">
+                    <select name="estado" class="form-select form-select-sm d-inline w-auto me-1">
+                      <option value="PENDIENTE" <%= p.estado==='PENDIENTE'?'selected':'' %>>PENDIENTE</option>
+                      <option value="APROBADA" <%= p.estado==='APROBADA'?'selected':'' %>>APROBADA</option>
+                      <option value="RECHAZADA" <%= p.estado==='RECHAZADA'?'selected':'' %>>RECHAZADA</option>
+                    </select>
+                    <button class="btn btn-sm btn-primary">Aplicar</button>
+                  </form>
+
+                  <form action="/postulaciones/eliminar/<%= p.id %>" method="POST" class="d-inline-block"
+                        onsubmit="return confirm('¿Eliminar esta postulación?')">
+                    <button class="btn btn-sm btn-danger mt-1">🗑️</button>
+                  </form>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal CREAR -->
+  <div class="modal fade" id="modalCrear" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <form class="modal-content" method="POST" action="/postulaciones/crear">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title">Nueva Postulación</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label">Fecha visita</label>
+              <input type="date" name="fecha_visita" class="form-control">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Medio comunicación</label>
+              <input type="text" name="medio_comunicacion" class="form-control">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Estado</label>
+              <select name="estado" class="form-select">
+                <option value="PENDIENTE">PENDIENTE</option>
+                <option value="APROBADA">APROBADA</option>
+                <option value="RECHAZADA">RECHAZADA</option>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Nombre niño*</label>
+              <input type="text" name="nombre_niño" class="form-control" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Fecha nacimiento</label>
+              <input type="date" name="fecha_nacimiento" class="form-control">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Edad</label>
+              <input type="number" step="0.1" name="edad" class="form-control">
+            </div>
+
+            <div class="col-md-12">
+              <label class="form-label">Dirección</label>
+              <input type="text" name="direccion" class="form-control">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Nombre madre</label>
+              <input type="text" name="nombre_madre" class="form-control">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Nombre padre</label>
+              <input type="text" name="nombre_padre" class="form-control">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Tel. madre</label>
+              <input type="text" name="telefono" class="form-control">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Tel. padre</label>
+              <input type="text" name="telefono_padre" class="form-control">
+            </div>
+
+            <div class="col-md-3 form-check mt-3">
+              <input type="checkbox" class="form-check-input" id="aud1" name="dificultad_auditiva" value="true">
+              <label class="form-check-label" for="aud1">Dificultad auditiva</label>
+            </div>
+            <div class="col-md-3 form-check mt-3">
+              <input type="checkbox" class="form-check-input" id="vis1" name="dificultad_visual" value="true">
+              <label class="form-check-label" for="vis1">Dificultad visual</label>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Tipo de apoyo</label>
+              <input type="text" name="tipo_apoyo" class="form-control">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Referido por</label>
+              <input type="text" name="referido_por" class="form-control">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Atendido por</label>
+              <input type="text" name="atendido_por" class="form-control">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Programa asignado</label>
+              <input type="text" name="programa_asignado" class="form-control">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Notas seguimiento</label>
+              <textarea name="notas_seguimiento" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Conclusiones</label>
+              <textarea name="conclusiones" class="form-control" rows="2"></textarea>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Grado</label>
+              <input type="text" name="grado" class="form-control">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Observaciones</label>
+              <textarea name="observaciones" class="form-control" rows="2"></textarea>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Diagnóstico</label>
+              <textarea name="diagnostico" class="form-control" rows="2"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-success">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal EDITAR -->
+  <div class="modal fade" id="modalEditar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <form class="modal-content" method="POST" id="formEditar">
+        <div class="modal-header bg-warning">
+          <h5 class="modal-title">Editar Postulación</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="edit-id">
+
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label">Fecha visita</label>
+              <input type="date" name="fecha_visita" id="e-visita" class="form-control">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Medio comunicación</label>
+              <input type="text" name="medio_comunicacion" id="e-medcom" class="form-control">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Estado</label>
+              <select name="estado" id="e-estado" class="form-select">
+                <option value="PENDIENTE">PENDIENTE</option>
+                <option value="APROBADA">APROBADA</option>
+                <option value="RECHAZADA">RECHAZADA</option>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Nombre niño*</label>
+              <input type="text" name="nombre_niño" id="e-nombre" class="form-control" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Fecha nacimiento</label>
+              <input type="date" name="fecha_nacimiento" id="e-nac" class="form-control">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Edad</label>
+              <input type="number" step="0.1" name="edad" id="e-edad" class="form-control">
+            </div>
+
+            <div class="col-md-12">
+              <label class="form-label">Dirección</label>
+              <input type="text" name="direccion" id="e-dir" class="form-control">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Nombre madre</label>
+              <input type="text" name="nombre_madre" id="e-madre" class="form-control">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Nombre padre</label>
+              <input type="text" name="nombre_padre" id="e-padre" class="form-control">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Tel. madre</label>
+              <input type="text" name="telefono" id="e-tel" class="form-control">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Tel. padre</label>
+              <input type="text" name="telefono_padre" id="e-telpadre" class="form-control">
+            </div>
+
+            <div class="col-md-3 form-check mt-3">
+              <input type="checkbox" class="form-check-input" id="e-aud" name="dificultad_auditiva" value="true">
+              <label class="form-check-label" for="e-aud">Dificultad auditiva</label>
+            </div>
+            <div class="col-md-3 form-check mt-3">
+              <input type="checkbox" class="form-check-input" id="e-vis" name="dificultad_visual" value="true">
+              <label class="form-check-label" for="e-vis">Dificultad visual</label>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Tipo de apoyo</label>
+              <input type="text" name="tipo_apoyo" id="e-apoyo" class="form-control">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Referido por</label>
+              <input type="text" name="referido_por" id="e-ref" class="form-control">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Atendido por</label>
+              <input type="text" name="atendido_por" id="e-atendido" class="form-control">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Programa asignado</label>
+              <input type="text" name="programa_asignado" id="e-prog" class="form-control">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Notas seguimiento</label>
+              <textarea name="notas_seguimiento" id="e-notseg" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Conclusiones</label>
+              <textarea name="conclusiones" id="e-conc" class="form-control" rows="2"></textarea>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Grado</label>
+              <input type="text" name="grado" id="e-grado" class="form-control">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Observaciones</label>
+              <textarea name="observaciones" id="e-obs" class="form-control" rows="2"></textarea>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Diagnóstico</label>
+              <textarea name="diagnostico" id="e-diagn" class="form-control" rows="2"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-warning">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // Cargar datos en modal Editar
+    const modalEditar = document.getElementById('modalEditar');
+    modalEditar.addEventListener('show.bs.modal', (e) => {
+      const b = e.relatedTarget;
+      const id = b.getAttribute('data-id');
+
+      const set = (id, val='') => document.getElementById(id).value = val || '';
+      document.getElementById('edit-id').value = id;
+      set('e-visita', b.getAttribute('data-visita'));
+      set('e-medcom', b.getAttribute('data-medcom'));
+      set('e-nombre', b.getAttribute('data-nombre'));
+      set('e-nac', b.getAttribute('data-nac'));
+      set('e-edad', b.getAttribute('data-edad'));
+      set('e-dir', b.getAttribute('data-dir'));
+      set('e-madre', b.getAttribute('data-madre'));
+      set('e-padre', b.getAttribute('data-padre'));
+      set('e-tel', b.getAttribute('data-tel'));
+      set('e-telpadre', b.getAttribute('data-telpadre'));
+      document.getElementById('e-aud').checked = (b.getAttribute('data-aud') === 'true');
+      document.getElementById('e-vis').checked = (b.getAttribute('data-vis') === 'true');
+      set('e-apoyo', b.getAttribute('data-apoyo'));
+      set('e-ref', b.getAttribute('data-ref'));
+      set('e-atendido', b.getAttribute('data-atendido'));
+      set('e-prog', b.getAttribute('data-prog'));
+      set('e-notseg', b.getAttribute('data-notseg'));
+      set('e-conc', b.getAttribute('data-conc'));
+      set('e-grado', b.getAttribute('data-grado'));
+      set('e-obs', b.getAttribute('data-obs'));
+      set('e-diagn', b.getAttribute('data-diagn'));
+      document.getElementById('e-estado').value = b.getAttribute('data-estado') || 'PENDIENTE';
+
+      // fijar action
+      document.getElementById('formEditar').action = `/postulaciones/editar/${id}`;
+    });
+
+    // Auto-ocultar flash
+    setTimeout(() => {
+      document.querySelectorAll('.alert').forEach(a => {
+        a.classList.remove('show'); a.classList.add('fade');
+        setTimeout(() => a.remove(), 400);
+      });
+    }, 4000);
+  </script>
+
+</body>
+</html>
