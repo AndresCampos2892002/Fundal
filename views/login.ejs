@@ -2,69 +2,59 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>FUNDAL</title>
+  <title>Panel FUNDAL</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/lumen/bootstrap.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   <link rel="stylesheet" href="/css/loginStyles.css">
 </head>
 
 <body>
-  <div class="main-container">
-    <div class="login-container">
-      <div class="login-image"></div>
-      <div class="login-form">
-        <h2 class="mb-4 text-center">Iniciar sesión</h2>
+  <div class="login-container">
+    <div class="login-image"></div>
+    <div class="login-form">
+      <h2 class="text-center">Iniciar Sesión</h2>
+      <p class="subtitle text-center">Bienvenido de nuevo a FUNDAL.</p>
 
-        <% if (error) { %>
-          <div class="alert alert-danger text-center"><%= error %></div>
-        <% } %>
+      <% if (error) { %>
+        <div class="alert alert-danger text-center"><%= error %></div>
+      <% } %>
 
-        <form action="/login" method="POST">
-          <div class="mb-3">
-            <label for="username" class="form-label">Nombre de usuario</label>
-            <input type="text" class="form-control" name="username" id="username" required>
+      <form action="/login" method="POST">
+        <div class="mb-3">
+          <label for="username" class="form-label">Nombre de usuario</label>
+          <input type="text" class="form-control" name="username" id="username" required>
+        </div>
+        <div class="mb-4">
+          <label for="password" class="form-label">Contraseña</label>
+          <div class="input-group">
+            <input type="password" class="form-control" id="password" name="password" required>
+            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+              <i class="bi bi-eye"></i>
+            </button>
           </div>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">INGRESAR</button>
+      </form>
 
-          <div class="mb-3">
-            <label for="password" class="form-label">Contraseña</label>
-            <div class="input-group">
-              <input type="password" class="form-control" id="password" name="password" required>
-              <button class="btn btn-outline-secondary" type="button" id="togglePassword">
-                <i class="bi bi-eye"></i>
-              </button>
-            </div>
-          </div>
-
-          <button type="submit" class="btn btn-primary w-100 mt-3">INGRESAR</button>
-        </form>
+      <div class="login-footer">
+        © <%= new Date().getFullYear() %> FUNDAL – Todos los derechos reservados
       </div>
     </div>
   </div>
 
   <script>
-    // Mostrar u ocultar contraseña
     const toggleBtn = document.getElementById('togglePassword');
     const passwordInput = document.getElementById('password');
-
     toggleBtn.addEventListener('click', () => {
       const isPassword = passwordInput.type === 'password';
       passwordInput.type = isPassword ? 'text' : 'password';
-
       const icon = toggleBtn.querySelector('i');
       icon.classList.toggle('bi-eye');
       icon.classList.toggle('bi-eye-slash');
     });
-
-    // Mostrar token si existe
-    <% if (typeof token !== 'undefined') { %>
-      console.log("Token JWT:", "<%= token %>");
-    <% } %>
   </script>
 
-  <div class="login-footer text-center mt-4 text-muted">
-    Hecho con amor para FUNDAL – Andrés Campos
-  </div>
 </body>
 </html>

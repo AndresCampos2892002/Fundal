@@ -1,134 +1,140 @@
-/* Fuente y fondo */
+/* ==========================================================================
+   CSS CONSISTENTE PARA LA PÁGINA DE LOGIN
+   ========================================================================== */
+
+/* --- Paleta de Colores y Variables --- */
+:root {
+  --color-accent: #FFEB3B;
+  --color-accent-dark: #facc15;
+  --color-surface: #ffffff;
+  --color-background: #f8f9fa;
+  --color-text-primary: #212529;
+  --color-text-secondary: #495057;
+  --color-border: #dee2e6;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif; /* Usamos Inter para consistencia */
+  --border-radius: 1rem;
+  --border-radius-sm: 8px;
+}
+
+/* --- Estilos Generales y Fondo --- */
 body {
+background: #CFCFCF;
+background: linear-gradient(90deg,rgba(207, 207, 207, 1) 0%, rgba(207, 207, 207, 1) 100%, rgba(207, 207, 207, 1) 58%);
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #252424, #ffffff);
-  height: 100vh;
-  margin: auto;
-  padding: 0;
+  background-color: var(--color-background);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  padding: 2rem;
 }
 
-.main-container {
-  width: 60%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-
-
+/* --- Contenedor Principal del Login --- */
 .login-container {
   display: flex;
-  flex-direction: row;
-  width: 100%;             /* ocupa el 90% horizontal */
-  max-width: 1000px;      /* más ancho que el actual */
-  height: 600px;
-  margin: auto;           /* centra horizontalmente */
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  border-radius: 20px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 900px;
+  min-height: 550px;
+  background-color: var(--color-surface);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
   overflow: hidden;
-  animation: fadeIn 0.8s ease-in-out;
+  animation: fadeIn 0.6s ease-out;
 }
 
-/* Imagen lateral (también más grande en altura) */
+/* --- Panel de la Imagen --- */
 .login-image {
-  width: 50%;
+  width: 45%;
   background: url('/img/fundallogotipo.jpg') no-repeat center center;
   background-size: cover;
 }
 
-/* Formulario (más espacioso) */
+/* --- Panel del Formulario --- */
 .login-form {
-  width: 50%;
-  background: rgba(255, 255, 255, 0.95);
-  padding: 80px 60px;              /* MÁS ESPACIO INTERNO */
+  width: 55%;
+  padding: 3rem 4rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
+.login-form h2 {
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 0.5rem;
+  font-size: 2rem;
+}
 
-/* Campos de entrada (más grandes) */
+.login-form p.subtitle {
+  color: var(--color-text-secondary);
+  margin-bottom: 2rem;
+}
+
+/* --- Estilos de Formulario (Consistentes con la App) --- */
+.form-label {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
 .form-control {
-  padding: 16px;
-  font-size: 1.1rem;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  margin-bottom: 25px;
+  border-radius: var(--border-radius-sm);
+  padding: 0.8rem 1rem;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  font-size: 1rem;
 }
-
 .form-control:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+  background-color: var(--color-surface);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(255, 235, 59, 0.3);
 }
 
+/* Botón de mostrar/ocultar contraseña */
+.input-group .btn {
+  border-color: var(--color-border);
+  background-color: var(--color-surface);
+}
+.input-group .btn:hover {
+  background-color: var(--color-background);
+}
 
+/* Botón de Iniciar Sesión */
 .btn-primary {
-  padding: 16px;
-  font-size: 1.1rem;
-  border-radius: 10px;
+  background-color: var(--color-accent);
+  color: var(--color-text-primary);
+  border: none;
+  border-radius: 50rem;
+  font-weight: 700;
+  padding: 0.8rem 1.5rem;
+  transition: all 0.2s ease;
+  width: 100%;
+  margin-top: 1rem;
 }
 .btn-primary:hover {
-  background-color: #0056b3;
-  transform: scale(1.05);
-  box-shadow: 0 0 10px rgba(0, 123, 255, 0.4);
+  background-color: var(--color-accent-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
-.input-group .form-control,
-.input-group .btn {
-  border-radius: 8px !important;
-  height: 65px;
-}
-
-
-/* Mensaje de error */
-.error-message {
-  color: red;
-  font-weight: bold;
-  margin-bottom: 15px;
+/* Footer */
+.login-footer {
+  font-size: 0.8rem;
+  color: #adb5bd; /* Un gris muy claro */
   text-align: center;
+  margin-top: auto; /* Empuja el footer hacia abajo */
+  padding-top: 2rem;
 }
 
 /* Animación */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .login-container {
-    flex-direction: column;
-    height: auto;
-  }
-
-  .login-image {
-    display: none;
-  }
-
-  .login-form {
-    width: 100%;
-    padding: 40px 20px;
-  }
+  body { padding: 0; align-items: stretch; }
+  .login-image { display: none; }
+  .login-container { flex-direction: column; height: 100vh; border-radius: 0; border: none; box-shadow: none; }
+  .login-form { width: 100%; padding: 2rem; }
 }
-
-.login-footer {
-  position: fixed;
-  bottom: 15px;
-  right: 20px;
-  font-size: 0.9rem;
-  color: #333;
-  font-style: italic;
-  opacity: 0.7;
-  z-index: 999;
-}
-

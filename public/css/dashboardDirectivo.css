@@ -1,0 +1,223 @@
+/* --- ESTILOS GENERALES Y LAYOUT PRINCIPAL --- */
+body {
+  background: #CFCFCF;
+  background: linear-gradient(90deg,rgba(207, 207, 207, 1) 0%, rgba(207, 207, 207, 1) 100%, rgba(207, 207, 207, 1) 58%);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  margin: 0;
+  /* Clave 1: El body es un contenedor flex que ocupa toda la altura de la pantalla */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow: hidden; /* Evita cualquier scroll accidental */
+}
+
+/* --- HEADER --- */
+.main-header {
+  display: flex; /* Activa Flexbox */
+  justify-content: space-between; /* Distribuye los elementos horizontalmente */
+  align-items: center; /* Alinea los elementos verticalmente al centro */
+  padding: 20px 40px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Estilo para el título dentro del header */
+.header-title {
+  margin: 0; /* Quita el margen por defecto del h2 */
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a202c;
+  /* Esto asegura que el título no esté pegado al logo o al botón */
+  text-align: center;
+  flex-grow: 1; /* Permite que el título ocupe el espacio central */
+}
+
+/* Estilos para el logo y el botón (ajustados para que funcionen bien) */
+.dashboard-logo {
+  height: 175px;
+  width: auto;
+}
+
+.logout-button {
+  /* Tus estilos para el botón de logout */
+  text-decoration: none;
+  font-weight: 600;
+  /* etc... */
+}
+
+/* El contenedor del saludo ahora solo centra el texto */
+.welcome-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.logout-button {
+  padding: 10px 20px;
+  background-color: #e4e6eb;
+  color: #050505;
+  border: none;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+.logout-button:hover {
+  background-color: #d8dbdf;
+}
+
+/* --- CONTENIDO PRINCIPAL --- */
+main.container-fluid {
+  /* Clave 2: El main crece para ocupar el espacio restante en el body */
+  flex-grow: 1;
+  padding: 0 40px 40px 40px; /* Ajusta el padding para que no toque los bordes */
+}
+
+.welcome-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.welcome-header h2 {
+  font-weight: 700;
+  color: #1a202c;
+}
+
+/* --- BENTO GRID REDISEÑADO --- */
+.bento-grid {
+  /* Clave 3: El grid también crece para llenar el espacio de 'main' */
+  flex-grow: 1;
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(4, 1fr); /* Ahora usamos 4 columnas para más flexibilidad */
+  grid-template-rows: 1fr 1fr; /* 2 filas que se reparten el espacio equitativamente */
+}
+
+.bento-box {
+  background-color: #ffffff;
+  border-radius: 24px;
+  padding: 25px;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Centra el contenido verticalmente */
+  position: relative;
+  overflow: hidden;
+}
+
+.bento-box:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.1);
+  border-color: #FFEB3B;
+}
+
+/* Asignación de áreas a las tarjetas en el nuevo grid de 4 columnas */
+.box-usuarios {
+  grid-column: 1 / 3; /* Ocupa desde la columna 1 hasta la 3 (2 espacios) */
+  grid-row: 1 / 2;
+}
+.box-postulaciones {
+  grid-column: 3 / 4;
+  grid-row: 1 / 2;
+}
+.box-expedientes {
+  grid-column: 4 / 5;
+  grid-row: 1 / 2;
+}
+.box-nino-nuevo {
+  grid-column: 1 / 2;
+  grid-row: 2 / 3;
+}
+.box-calendario {
+  grid-column: 2 / 5; /* Ocupa 3 espacios */
+  grid-row: 2 / 3;
+}
+
+.box-content {
+  display: flex;
+  align-items: center;
+}
+
+.box-icon {
+  font-size: 1.8rem; /* Iconos un poco más grandes */
+  min-width: 55px;
+  height: 55px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20px;
+  color: #000000;
+  background-color: #f0f2f5;
+  transition: all 0.3s ease;
+}
+
+.bento-box:hover .box-icon {
+  background-color: #FFEB3B;
+  transform: scale(1.1) rotate(-10deg);
+}
+
+.box-text h5 {
+  font-weight: 600;
+  color: #1c1e21;
+  font-size: 1.1rem;
+}
+.box-text p {
+  font-size: 0.9rem;
+  color: #606770;
+  margin: 0;
+}
+
+/* Estilos del Chat Flotante (sin cambios, ya estaban bien) */
+.chat-fab-wrapper {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 1051;
+  background-color: #FFEB3B;
+  color: #000;
+  border-radius: 50px;
+  padding: 12px 20px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  cursor: grab;
+  user-select: none;
+  transition: box-shadow 0.2s ease-in-out, transform 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+.chat-fab-wrapper:hover {
+  transform: scale(1.05);
+}
+
+/* --- RESPONSIVIDAD --- */
+@media (max-width: 992px) {
+  .bento-grid {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+  }
+  /* Reajustar áreas para tablets */
+  .box-usuarios { grid-column: 1 / 3; grid-row: 1 / 2; }
+  .box-postulaciones { grid-column: 1 / 2; grid-row: 2 / 3; }
+  .box-expedientes { grid-column: 2 / 3; grid-row: 2 / 3; }
+  .box-nino-nuevo { grid-column: 1 / 2; grid-row: 3 / 4; }
+  .box-calendario { grid-column: 2 / 3; grid-row: 3 / 4; }
+}
+
+@media (max-width: 768px) {
+  body {
+    overflow-y: auto; /* En móviles, permitimos el scroll */
+    min-height: auto;
+  }
+  main.container-fluid, .main-header {
+    padding: 20px; /* Menos padding en móviles */
+  }
+  .bento-grid {
+    display: flex; /* En móvil, cambiamos a flex para una sola columna */
+    flex-direction: column;
+    height: auto;
+  }
+  .bento-box {
+    min-height: 150px;
+  }
+}

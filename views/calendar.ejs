@@ -4,128 +4,82 @@
   <meta charset="UTF-8">
   <title>Calendario FUNDAL</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- Bootstrap + Estilos -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <link href="/css/calendarStyles.css" rel="stylesheet">
-
-  <style>
-    .day-cell { position: relative; cursor: pointer; }
-    .day-cell:hover { background: #f6f8ff; }
-    .day-dot {
-      position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%);
-      width: 6px; height: 6px; border-radius: 50%; background: #0d6efd;
-    }
-    .day-selected { outline: 2px solid #0d6efd; outline-offset: -2px; background: #eef4ff; }
-    .agenda-card { position: sticky; top: 16px; }
-    .agenda-empty { color:#6c757d; font-style: italic; }
-    .agenda-item + .agenda-item { border-top: 1px dashed #e5e7eb; }
-    .agenda-time { font-size: .85rem; color:#6c757d; }
-  </style>
+  <link href="/css/navbarStyles.css" rel="stylesheet">
 </head>
 <body>
-  <div class="container mt-4">
-    <div class="row g-4">
-      <!-- Columna izquierda: Calendario -->
-      <div class="col-lg-8">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <button class="btn btn-outline-secondary" onclick="cambiarMes(-1)">← Anterior</button>
-          <h4 id="titulo-mes" class="m-0"></h4>
-          <button class="btn btn-outline-secondary" onclick="cambiarMes(1)">Siguiente →</button>
+  <%- include('navbar') %>
+
+  <div class="container-fluid mt-5 mb-5">
+    <div class="main-card">
+      <div class="row g-4">
+        <div class="col-lg-8">
+          <div class="d-flex justify-content-between align-items-center mb-3 calendar-header">
+            <button class="btn btn-secondary" onclick="cambiarMes(-1)"><i class="fas fa-chevron-left"></i></button>
+            <h4 id="titulo-mes" class="m-0"></h4>
+            <button class="btn btn-secondary" onclick="cambiarMes(1)"><i class="fas fa-chevron-right"></i></button>
+          </div>
+          <div id="calendar" class="calendar-grid"></div>
         </div>
 
-        <div id="calendar" class="calendar"></div>
-      </div>
-
-      <!-- Columna derecha: Agenda del día + acciones -->
-      <div class="col-lg-4">
-        <div class="card agenda-card shadow-sm">
-          <div class="card-header bg-primary text-white">
-            <div class="d-flex align-items-center justify-content-between">
-              <strong>📌 Agenda del día</strong>
-              <small id="agenda-fecha"></small>
+        <div class="col-lg-4">
+          <div class="agenda-card">
+            <div class="agenda-card-header">
+              <div class="d-flex align-items-center justify-content-between">
+                <strong>Agenda del día</strong>
+                <small id="agenda-fecha"></small>
+              </div>
             </div>
-          </div>
-          <div class="card-body" id="agenda-lista">
-            <p class="agenda-empty m-0">Selecciona un día del calendario.</p>
-          </div>
-          <div class="card-footer d-flex gap-2">
-            <button class="btn btn-success flex-fill" id="btnAgregarEvento" disabled data-bs-toggle="modal" data-bs-target="#modalEvento">
-              ➕ Agregar Evento
-            </button>
-            <button class="btn btn-outline-primary flex-fill" id="btnAgregarNota" disabled data-bs-toggle="modal" data-bs-target="#modalNota">
-              📝 Agregar Nota
-            </button>
+            <div class="agenda-card-body" id="agenda-lista">
+              <p class="agenda-empty m-0">Selecciona un día del calendario.</p>
+            </div>
+            <div class="agenda-card-footer">
+              <button class="btn btn-primary flex-fill" id="btnAgregarEvento" disabled data-bs-toggle="modal" data-bs-target="#modalEvento">
+                <i class="fas fa-plus me-1"></i> Evento
+              </button>
+              <button class="btn btn-secondary flex-fill" id="btnAgregarNota" disabled data-bs-toggle="modal" data-bs-target="#modalNota">
+                <i class="fas fa-pencil-alt me-1"></i> Nota
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: Crear Evento -->
   <div class="modal fade" id="modalEvento" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
       <form class="modal-content" action="/calendar/evento" method="POST">
-        <div class="modal-header bg-success text-white">
-          <h5 class="modal-title">Nuevo evento</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
+        <div class="modal-header bg-success"><h5 class="modal-title">Nuevo evento</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
         <div class="modal-body">
           <input type="hidden" name="fecha" id="evento-fecha">
           <p class="mb-2"><strong>Fecha:</strong> <span id="evento-fecha-texto"></span></p>
-
-          <div class="mb-3">
-            <label class="form-label">Hora (opcional)</label>
-            <input type="time" class="form-control" name="hora">
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label">Título *</label>
-            <input type="text" class="form-control" name="titulo" required>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label">Descripción</label>
-            <textarea class="form-control" name="descripcion" rows="2"></textarea>
-          </div>
+          <div class="mb-3"><label class="form-label">Hora (opcional)</label><input type="time" class="form-control" name="hora"></div>
+          <div class="mb-3"><label class="form-label">Título *</label><input type="text" class="form-control" name="titulo" required></div>
+          <div class="mb-3"><label class="form-label">Descripción</label><textarea class="form-control" name="descripcion" rows="2"></textarea></div>
         </div>
-        <div class="modal-footer">
-          <button class="btn btn-success">Guardar Evento</button>
-        </div>
+        <div class="modal-footer"><button class="btn btn-primary">Guardar Evento</button></div>
       </form>
     </div>
   </div>
 
-  <!-- MODAL: Crear Nota -->
   <div class="modal fade" id="modalNota" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
       <form class="modal-content" id="notaForm" action="/calendar/nota" method="POST">
-        <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title">Nueva nota</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
+        <div class="modal-header bg-warning"><h5 class="modal-title">Nueva nota</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
         <div class="modal-body">
           <input type="hidden" name="fecha" id="nota-fecha">
           <p class="mb-2"><strong>Fecha:</strong> <span id="nota-fecha-texto"></span></p>
-
-          <div class="mb-3">
-            <label class="form-label">Hora del recordatorio (opcional)</label>
-            <input type="time" class="form-control" name="hora">
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label">Nota *</label>
-            <textarea class="form-control" name="nota" id="notaTexto" rows="3" required></textarea>
-          </div>
+          <div class="mb-3"><label class="form-label">Hora del recordatorio (opcional)</label><input type="time" class="form-control" name="hora"></div>
+          <div class="mb-3"><label class="form-label">Nota *</label><textarea class="form-control" name="nota" id="notaTexto" rows="3" required></textarea></div>
         </div>
-        <div class="modal-footer">
-          <button class="btn btn-primary">Guardar Nota</button>
-        </div>
+        <div class="modal-footer"><button class="btn btn-primary">Guardar Nota</button></div>
       </form>
     </div>
   </div>
 
-  <!-- Bootstrap -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
@@ -139,15 +93,13 @@
     const [y, m, d] = ymd.split('-').map(Number);
     return new Date(y, m - 1, d);
   }
-
-  // 🔧 FIX: normaliza "YYYY-MM-DD", "YYYY-MM-DDTHH..." o "YYYY-MM-DD HH..."
   function safeDateStr(value) {
     if (!value) return null;
     if (value instanceof Date) return ymdFromDateLocal(value);
     const s = String(value).trim();
     if (s.includes('T')) return s.split('T')[0];
     if (s.includes(' ')) return s.split(' ')[0];
-    return s.slice(0, 10); // por si viene sin separadores raros
+    return s.slice(0, 10);
   }
 
   const RAW_EVENTOS = <%- JSON.stringify(eventos || []) %>;
@@ -159,7 +111,7 @@
     descripcion: e.descripcion || ''
   }));
   const DATA_NOTAS = RAW_NOTAS.map(n => ({
-    date: safeDateStr(n.fecha), // ahora sí quedará "YYYY-MM-DD"
+    date: safeDateStr(n.fecha),
     text: n.nota,
     hora: n.hora || null
   }));
@@ -167,6 +119,45 @@
 
 
 <script>
+  // Funciones de ayuda para manejar fechas
+  function ymdFromDateLocal(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+  function dateFromYMD(ymd) {
+    const [y, m, d] = ymd.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  }
+  function safeDateStr(value) {
+    if (!value) return null;
+    if (value instanceof Date) return ymdFromDateLocal(value);
+    const s = String(value).trim();
+    if (s.includes('T')) return s.split('T')[0];
+    if (s.includes(' ')) return s.split(' ')[0];
+    return s.slice(0, 10);
+  }
+
+  // Obtenemos y procesamos los datos del servidor
+  const RAW_EVENTOS = <%- JSON.stringify(eventos || []) %>;
+  const RAW_NOTAS   = <%- JSON.stringify(notas   || []) %>;
+
+  const DATA_EVENTOS = RAW_EVENTOS.map(e => ({
+    date: safeDateStr(e.fecha),
+    title: e.titulo,
+    descripcion: e.descripcion || ''
+  }));
+  const DATA_NOTAS = RAW_NOTAS.map(n => ({
+    date: safeDateStr(n.fecha),
+    text: n.nota,
+    hora: n.hora || null
+  }));
+</script>
+
+
+<script>
+  // Definición de variables del DOM
   const calendarEl = document.getElementById('calendar');
   const tituloMes = document.getElementById('titulo-mes');
   const agendaFecha = document.getElementById('agenda-fecha');
@@ -179,20 +170,22 @@
   const notaFechaTxt = document.getElementById('nota-fecha-texto');
 
   let fechaActual = new Date();
-  let fechaSeleccionada = null; // YYYY-MM-DD
+  let fechaSeleccionada = null;
+
+  // --- INICIO DE LA LÓGICA ACTUALIZADA ---
+
+  function tieneEventos(dateStr) { return DATA_EVENTOS.some(e => e.date === dateStr); }
+  function tieneNotas(dateStr) { return DATA_NOTAS.some(n => n.date === dateStr); }
 
   function renderizarCalendario() {
     calendarEl.innerHTML = '';
-
     const year = fechaActual.getFullYear();
     const month = fechaActual.getMonth();
     const today = new Date();
-
     const monthStart = new Date(year, month, 1);
     const monthEnd = new Date(year, month + 1, 0);
-    const startDay = (monthStart.getDay() + 6) % 7; // Lunes = 0
+    const startDay = (monthStart.getDay() + 6) % 7;
 
-    // Encabezados
     const dayNames = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
     dayNames.forEach(d => {
       const header = document.createElement('div');
@@ -201,27 +194,39 @@
       calendarEl.appendChild(header);
     });
 
-    // Días vacíos
     for (let i = 0; i < startDay; i++) {
-      const empty = document.createElement('div');
-      empty.className = 'day-cell';
-      calendarEl.appendChild(empty);
+      calendarEl.appendChild(document.createElement('div'));
     }
 
-    // Días del mes
     for (let day = 1; day <= monthEnd.getDate(); day++) {
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
       const cell = document.createElement('div');
       cell.className = 'day-cell';
-      cell.textContent = day;
+
+      const dayNumberSpan = document.createElement('span');
+      dayNumberSpan.textContent = day;
+      cell.appendChild(dayNumberSpan);
 
       const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
       if (isToday) cell.classList.add('today');
 
-      if (tieneContenido(dateStr)) {
-        const dot = document.createElement('span');
-        dot.className = 'day-dot';
-        cell.appendChild(dot);
+      const hasEvents = tieneEventos(dateStr);
+      const hasNotes = tieneNotas(dateStr);
+
+      if (hasEvents || hasNotes) {
+        const dotContainer = document.createElement('div');
+        dotContainer.className = 'day-dot';
+        if (hasEvents) {
+          const eventDot = document.createElement('span');
+          eventDot.className = 'event-dot';
+          dotContainer.appendChild(eventDot);
+        }
+        if (hasNotes) {
+          const noteDot = document.createElement('span');
+          noteDot.className = 'note-dot';
+          dotContainer.appendChild(noteDot);
+        }
+        cell.appendChild(dotContainer);
       }
 
       cell.addEventListener('click', () => {
@@ -231,21 +236,22 @@
       calendarEl.appendChild(cell);
     }
 
-    tituloMes.textContent = fechaActual
-      .toLocaleString('es-ES', { month: 'long', year: 'numeric' })
-      .toUpperCase();
+    tituloMes.textContent = fechaActual.toLocaleString('es-ES', { month: 'long', year: 'numeric' }).toUpperCase();
 
+    // Lógica para seleccionar el día actual por defecto
     const defaultDate = new Date();
     const defaultStr = (defaultDate.getMonth() === month && defaultDate.getFullYear() === year)
       ? ymdFromDateLocal(defaultDate)
       : `${year}-${String(month+1).padStart(2,'0')}-01`;
 
     const celdas = calendarEl.querySelectorAll('.day-cell');
-    const offset = startDay;
     const dayNum = parseInt(defaultStr.split('-')[2], 10);
-    const idx = offset + dayNum - 1;
-    const cellDefault = celdas[idx];
-    if (cellDefault) seleccionarDia(defaultStr, cellDefault, false);
+
+    // Encontramos la celda correcta (considerando los días vacíos al inicio)
+    const celdaCorrecta = Array.from(celdas).find(c => c.textContent == dayNum);
+    if (celdaCorrecta) {
+      seleccionarDia(defaultStr, celdaCorrecta, false);
+    }
   }
 
   function cambiarMes(valor) {
@@ -256,68 +262,52 @@
   function seleccionarDia(dateStr, cellEl, focusButtons = true) {
     calendarEl.querySelectorAll('.day-cell.day-selected').forEach(c => c.classList.remove('day-selected'));
     cellEl.classList.add('day-selected');
-
     fechaSeleccionada = dateStr;
     renderAgenda(dateStr);
-
     btnEvento.disabled = false;
     btnNota.disabled = false;
-
     eventoFecha.value = dateStr;
     eventoFechaTxt.textContent = dateStr;
-
     notaFecha.value = dateStr;
     notaFechaTxt.textContent = dateStr;
-
     if (focusButtons) btnEvento.focus();
   }
 
   function renderAgenda(dateStr) {
-    agendaFecha.textContent = dateFromYMD(dateStr)
-      .toLocaleDateString('es-ES', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+    agendaFecha.textContent = dateFromYMD(dateStr).toLocaleDateString('es-ES', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
 
     const eventosDelDia = DATA_EVENTOS.filter(e => e.date === dateStr);
     const notasDelDia = DATA_NOTAS.filter(n => n.date === dateStr);
 
     agendaLista.innerHTML = '';
-
     if (eventosDelDia.length === 0 && notasDelDia.length === 0) {
       agendaLista.innerHTML = '<p class="agenda-empty m-0">No hay nada para este día.</p>';
       return;
     }
-
     if (eventosDelDia.length > 0) {
       const h = document.createElement('h6');
-      h.className = 'text-primary';
       h.textContent = 'Eventos';
       agendaLista.appendChild(h);
-
       eventosDelDia.forEach(ev => {
         const item = document.createElement('div');
-        item.className = 'agenda-item py-2';
-        item.innerHTML = `<div class="fw-semibold">📅 ${ev.title}</div>${ev.descripcion ? `<div class="small text-muted">${ev.descripcion}</div>` : ''}`;
+        item.className = 'agenda-item';
+        item.innerHTML = `<div class="fw-semibold event-title">${ev.title}</div>${ev.descripcion ? `<div class="small text-muted">${ev.descripcion}</div>` : ''}`;
         agendaLista.appendChild(item);
       });
     }
-
     if (notasDelDia.length > 0) {
       const h2 = document.createElement('h6');
-      h2.className = 'text-success mt-3';
+      h2.className = 'mt-3';
       h2.textContent = 'Notas personales';
       agendaLista.appendChild(h2);
-
       notasDelDia.sort((a,b) => (a.hora || '00:00').localeCompare(b.hora || '00:00'));
       notasDelDia.forEach(nt => {
         const item = document.createElement('div');
-        item.className = 'agenda-item py-2';
-        item.innerHTML = `<div>${nt.text}</div>${nt.hora ? `<div class="agenda-time">⏰ ${nt.hora}</div>` : ''}`;
+        item.className = 'agenda-item';
+        item.innerHTML = `<div class="note-text">${nt.text}</div>${nt.hora ? `<div class="agenda-time">⏰ ${nt.hora}</div>` : ''}`;
         agendaLista.appendChild(item);
       });
     }
-  }
-
-  function tieneContenido(dateStr) {
-    return DATA_EVENTOS.some(e => e.date === dateStr) || DATA_NOTAS.some(n => n.date === dateStr);
   }
 
   renderizarCalendario();

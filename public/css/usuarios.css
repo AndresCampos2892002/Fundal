@@ -1,85 +1,173 @@
+/* --- ESTILOS PARA LA PÁGINA DE USUARIOS --- */
+
+/* Estilos generales y de layout principal */
 body {
-  background-color: #f8f9fa; /* Un fondo sutilmente gris */
+  background-color: #f8f9fa;
+  font-family: 'Inter', system-ui, sans-serif;
 }
-
-.card-usuarios {
-  background: #ffffff;
+.main-card {
+  background-color: #ffffff;
   padding: 2.5rem;
-  border-radius: 1rem; /* Esquinas más redondeadas */
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08); /* Sombra más suave y moderna */
-  transition: box-shadow 0.3s ease-in-out;
+  border-radius: 1rem;
+  border: 1px solid #dee2e6;
+}
+.page-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #dee2e6;
+}
+.page-header h2 {
+  font-weight: 700;
+  color: #212529;
 }
 
-.card-usuarios:hover {
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+/* Panel del formulario de creación */
+.creation-form-panel {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
 }
-
-.card-header-usuarios {
-  background-color: #1d3557;
-  color: white;
-  border-top-left-radius: 1rem !important;
-  border-top-right-radius: 1rem !important;
-  padding: 1.25rem 2rem;
+.form-panel-title {
   font-weight: 600;
-  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  color: #495057;
 }
 
-.table {
-  border-radius: 0.75rem; /* Esquinas de la tabla redondeadas */
+/* Estilos de tabla (consistente con postulaciones) */
+.table-wrapper {
+  border: 1px solid #dee2e6;
+  border-radius: 0.75rem;
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Sombra sutil para la tabla */
+}
+.table { margin: 0; }
+.table thead { background-color: #f8f9fa; }
+.table thead th {
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: #6c757d;
+  border-bottom: 1px solid #dee2e6;
+}
+.table td {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #dee2e6;
+  vertical-align: middle;
+}
+.table tbody tr:hover { background-color: #f8f9fa; }
+.table strong { color: #212529; font-weight: 600; }
+
+/* Badge para el rol */
+.badge {
+  background-color: #e9ecef;
+  color: #495057;
+  font-weight: 600;
+  padding: 0.4em 0.8em;
+  border-radius: 6px;
 }
 
-.table thead {
-  background-color: #457b9d; /* Color de fondo más suave para la cabecera */
-  color: white;
-}
-
-.table tbody tr:hover {
-  background-color: #e9ecef; /* Un hover sutilmente más oscuro */
-}
-
-/* Nuevos estilos para los botones */
-.btn {
-  border-radius: 2rem; /* Botones más redondeados */
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: all 0.2s ease-in-out;
-}
-
-.btn-success {
-  background: linear-gradient(45deg, #28a745, #218838);
+/* Botones principales y de acciones */
+.btn-primary {
+  background-color: #FFEB3B;
+  color: #212529;
   border: none;
-  box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
+  border-radius: 50rem;
+  font-weight: 700;
+  transition: all 0.2s ease;
 }
-
-.btn-success:hover {
+.btn-primary:hover {
+  background-color: #facc15;
   transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(40, 167, 69, 0.3);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
-
-.btn-warning {
-  background: linear-gradient(45deg, #ffc107, #e0a800);
+.btn-icon {
+  background-color: transparent;
+  color: #6c757d;
   border: none;
-  box-shadow: 0 4px 10px rgba(255, 193, 7, 0.2);
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+.btn-icon:hover {
+  background-color: #e9ecef;
+  color: #212529;
 }
 
-.btn-warning:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(255, 193, 7, 0.3);
+/* Estilos para formularios (consistente con modales) */
+.form-control, .form-select {
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  background-color: #ffffff;
+  border: 1px solid #ced4da;
+  transition: all 0.2s ease;
 }
-
-.btn-danger {
-  background: linear-gradient(45deg, #dc3545, #c82333);
+.form-control:focus, .form-select:focus {
+  border-color: #FFEB3B;
+  box-shadow: 0 0 0 3px rgba(255, 235, 59, 0.3);
+}
+.password-toggle-btn {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  background: transparent;
   border: none;
-  box-shadow: 0 4px 10px rgba(220, 53, 69, 0.2);
+  color: #6c757d;
+  cursor: pointer;
+  padding: 0.25rem;
 }
 
-.btn-danger:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(220, 53, 69, 0.3);
+/* ESTILOS PARA LOS MODALES */
+.modal-content {
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+.modal-header {
+  background-color: #f8f9fa;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #dee2e6;
+  border-top: 4px solid #ffc107; /* Borde amarillo para "Editar" */
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+}
+.modal-title {
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #212529;
+}
+.modal-body { padding: 2rem; }
+.modal-footer {
+  background-color: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+  padding: 1rem 2rem;
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+}
+.modal-footer .btn-primary {
+  padding: 0.75rem 1.5rem;
 }
 
-.modal-header.bg-primary {
-  background-color: #1d3557 !important;
+/* --- ANIMACIÓN DE ENTRADA --- */
+
+.main-card {
+  /* Se aplica la animación al cargar la tarjeta */
+  animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

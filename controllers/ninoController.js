@@ -3,47 +3,25 @@ const { body, validationResult } = require('express-validator');
 const multer = require('multer');
 const path = require('path');
 
-// --- Configuración de Multer para la subida de archivos ---
-// El destino de los archivos y cómo se nombran.
+// Middlewares de permisos (asumiendo que los tienes en un archivo separado o definido en tus rutas)
+// const { ensureSession, checkEditPermission } = require('../middlewares/authMiddleware');
+
+// --- Configuración de Multer (se mantiene tu configuración) ---
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    // Asegúrate de que esta carpeta exista en tu proyecto.
     cb(null, 'public/uploads/');
   },
   filename: (req, file, cb) => {
-    // Crea un nombre de archivo único para evitar colisiones.
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
   }
 });
-
 const upload = multer({ storage: storage });
-
-// Mismos middlewares de permisos que ya tienes
-const ensureSession = (req, res, next) => {
-  if (!req.session.user) {
-    req.flash('error_msg', 'Debes iniciar sesión.');
-    return res.redirect('/login');
-  }
-  next();
-};
-
-const canEdit = (req) => req.session.user && (req.session.user.rol === 'Secretaria' || req.session.user.rol === 'Directivo');
-
-const checkEditPermission = (req, res, next) => {
-  if (!canEdit(req)) {
-    req.flash('error_msg', '🔒 No tienes permisos para esta acción.');
-    return res.redirect('/postulaciones');
-  }
-  next();
-};
 
 const ninoValidator = [
   body('nombre_completo').notEmpty().withMessage('El nombre completo del niño es requerido.'),
-  body('codigo').notEmpty().withMessage('El código del niño es requerido.').isAlphanumeric().withMessage('El código debe ser alfanumérico.'),
-  body('fecha_nacimiento').optional({ checkFalsy: true }).isISO8601().toDate().withMessage('La fecha de nacimiento no es válida.'),
-  body('edad').optional({ checkFalsy: true }).isFloat({ min: 0 }).withMessage('La edad debe ser un número válido.'),
-  // La validación de los documentos la haremos en la lógica del controlador.
+  body('codigo').notEmpty().withMessage('El código del niño es requerido.'),
+  body('anio_escolar').notEmpty().withMessage('El año escolar es requerido.').isInt({ min: 2000, max: 2100 }).withMessage('Debe ser un año válido.'),
 ];
 
 // ----------------------------------------------------
@@ -51,111 +29,154 @@ const ninoValidator = [
 // ----------------------------------------------------
 
 exports.mostrarFormulario = [
-  ensureSession,
-  checkEditPermission,
+  // ensureSession, checkEditPermission,
   async (req, res) => {
     try {
+      let formData = {};
+      const { fromPostulacion } = req.query;
+
+      if (fromPostulacion) {
+        const result = await pool.query('SELECT * FROM postulaciones WHERE id = $1', [fromPostulacion]);
+        if (result.rows.length > 0) {
+          const p = result.rows[0];
+          formData = {
+            fromPostulationId: p.id,
+            nombre_completo: p.nombre_niño,
+            fecha_nacimiento: p.fecha_nacimiento,
+            edad: p.edad,
+            diagnostico: p.diagnostico,
+            referido_por: p.referido_por,
+          };
+        }
+      }
+
       res.render('crear-nino', {
         user: req.session.user,
+        anioSugerido: new Date().getFullYear(),
         success_msg: req.flash('success_msg')[0] || null,
-        error_msg: req.flash('error_msg')[0] || null
+        error_msg: req.flash('error_msg')[0] || null,
+        formData: formData
       });
     } catch (err) {
-      console.error('Error al cargar formulario de niño:', err);
-      req.flash('error_msg', '❌ Error al cargar el formulario.');
+      console.error('❌ Error al cargar el formulario de niño:', err);
+      req.flash('error_msg', '❌ Error al intentar cargar los datos de la postulación.');
       res.redirect('/postulaciones');
     }
-}];
+  }
+];
 
-// La función 'crearNino' ahora usa 'multer' como middleware
 exports.crearNino = [
-  ensureSession,
-  checkEditPermission,
-  upload.fields([ // Usamos 'fields' para manejar múltiples archivos
-    { name: 'documento_archivo[]', maxCount: 10 }
-  ]),
+  // ensureSession, checkEditPermission,
+  upload.array('documento_archivo[]'),
   ...ninoValidator,
   async (req, res) => {
-    // Los datos de texto están en req.body, y los archivos en req.files
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      req.flash('error_msg', errors.array().map(e => e.msg).join('; '));
-      return res.redirect('/crear-nino');
+      // Si hay errores de validación, renderiza de nuevo el formulario con los errores y los datos
+      return res.status(400).render('crear-nino', {
+        user: req.session.user,
+        anioSugerido: new Date().getFullYear(),
+        // Convierte el array de errores a un string simple para mostrarlo
+        error_msg: errors.array().map(e => e.msg).join('. '),
+        formData: req.body // Devuelve todos los datos que el usuario ya había escrito
+      });
     }
 
+    const { fromPostulationId } = req.body;
     const client = await pool.connect();
+
     try {
       await client.query('BEGIN');
 
       const {
         codigo, nombre_completo, fecha_nacimiento, edad, diagnostico, referido_por,
-        representante_nombre, representante_dpi, representante_parentesco, representante_telefono, representante_direccion,
-        documento_tipo
+        anio_escolar, grado, programa_asignado, observaciones,
+        representante_nombre, representante_dpi, representante_parentesco,
+        representante_telefono, representante_direccion
       } = req.body;
 
-      const documentosArchivos = req.files['documento_archivo[]'] || [];
+      const documentosTipo = req.body['documento_tipo[]'];
+      const documentosArchivos = req.files;
 
-      // 1. Insertar en la tabla 'nino'
-      const ninoQ = `
-        INSERT INTO nino (codigo, nombre_completo, fecha_nacimiento, edad, diagnostico, referido_por, fecha_creacion)
-        VALUES ($1, $2, $3, $4, $5, $6, NOW())
-        RETURNING id;
+      const ninoQuery = `
+        INSERT INTO nino (codigo, nombre_completo, fecha_nacimiento, edad, diagnostico, referido_por, fecha_creacion, postulacion_id)
+        VALUES ($1, $2, $3, $4, $5, $6, NOW(), $7) RETURNING id;
       `;
-      const ninoResult = await client.query(ninoQ, [
-        codigo,
-        nombre_completo,
-        fecha_nacimiento || null,
-        edad || null,
-        diagnostico || null,
-        referido_por || null,
+      const ninoResult = await client.query(ninoQuery, [
+        codigo, nombre_completo, fecha_nacimiento || null, edad || null, diagnostico || null, referido_por || null,
+        fromPostulationId || null
       ]);
       const ninoId = ninoResult.rows[0].id;
 
-      // 2. Insertar en la tabla 'representantes_legales'
-      if (representante_nombre) {
-        const representanteQ = `
+      const expedienteAnualQuery = `
+        INSERT INTO expedientes_anuales (nino_id, anio, grado, programa_asignado, observaciones)
+        VALUES ($1, $2, $3, $4, $5);
+      `;
+      await client.query(expedienteAnualQuery, [
+        ninoId, anio_escolar, grado || null, programa_asignado || null, observaciones || null
+      ]);
+
+      if (representante_nombre && representante_nombre.trim() !== '') {
+        const representanteQuery = `
           INSERT INTO representantes_legales (nino_id, nombre, dpi, parentesco, telefono, direccion)
           VALUES ($1, $2, $3, $4, $5, $6);
         `;
-        await client.query(representanteQ, [
-          ninoId,
-          representante_nombre,
-          representante_dpi || null,
-          representante_parentesco || null,
-          representante_telefono || null,
-          representante_direccion || null,
+        await client.query(representanteQuery, [
+          ninoId, representante_nombre, representante_dpi || null, representante_parentesco || null,
+          representante_telefono || null, representante_direccion || null
         ]);
       }
 
-      // 3. Insertar documentos (ahora en un loop)
-      if (documentosArchivos.length > 0) {
+      if (documentosArchivos && documentosArchivos.length > 0) {
+        const documentoQuery = `
+          INSERT INTO documentos_nino (nino_id, tipo, archivo, fecha_subida)
+          VALUES ($1, $2, $3, NOW());
+        `;
         for (let i = 0; i < documentosArchivos.length; i++) {
-          const documentoQ = `
-            INSERT INTO documentos_nino (nino_id, tipo, archivo, confirmado, fecha_subida)
-            VALUES ($1, $2, $3, false, NOW());
-          `;
-          await client.query(documentoQ, [
-            ninoId,
-            documento_tipo[i],
-            documentosArchivos[i].path
-          ]);
+          const tipo = Array.isArray(documentosTipo) ? documentosTipo[i] : documentosTipo;
+          const archivo = documentosArchivos[i];
+          if (tipo && archivo) {
+            await client.query(documentoQuery, [ninoId, tipo, archivo.path]);
+          }
         }
       }
 
       await client.query('COMMIT');
-      req.flash('success_msg', '✅ Expediente de niño creado con éxito.');
+      req.flash('success_msg', `✅ Expediente completo para ${nombre_completo} creado.`);
       res.redirect('/expedientes');
 
     } catch (err) {
       await client.query('ROLLBACK');
-      console.error('Error al crear niño:', err);
-      req.flash('error_msg', '❌ Error al crear el expediente del niño.');
-      res.redirect('/crear-nino');
+      console.error('❌ Error al crear niño y su expediente completo:', err);
+
+      // ==================================================================
+      // =========== INICIO DE LA CORRECCIÓN: MANEJO DE ERRORES ===========
+      // ==================================================================
+      let friendlyError = '❌ Ocurrió un error inesperado al guardar el expediente.';
+
+      // Verificamos si el error es por una llave única duplicada de PostgreSQL
+      if (err.code === '23505') {
+        // Verificamos si el error es específicamente por la columna 'codigo'
+        if (err.constraint && err.constraint.includes('codigo')) {
+          friendlyError = `❌ El código de expediente "${req.body.codigo}" ya está en uso. Por favor, ingrese uno diferente.`;
+        }
+      }
+
+      // Renderizamos la misma vista, pasando el mensaje de error y los datos del formulario
+      // para que el usuario no pierda su trabajo.
+      res.status(500).render('crear-nino', {
+          user: req.session.user,
+          anioSugerido: new Date().getFullYear(),
+          error_msg: friendlyError,
+          formData: req.body // Devolvemos todos los datos que el usuario ya había escrito
+      });
+      // ==================================================================
+      // ============ FIN DE LA CORRECCIÓN: MANEJO DE ERRORES =============
+      // ==================================================================
+
     } finally {
       client.release();
     }
-}];
+  }
+];
 
-// Exportamos los middlewares para que las rutas puedan usarlos
-exports.ensureSession = ensureSession;
-exports.checkEditPermission = checkEditPermission;

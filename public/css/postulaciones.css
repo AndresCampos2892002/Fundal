@@ -1,144 +1,353 @@
-/* Estilos generales y de tipografía */
-body {
-  background-color: #f0f2f5; /* Fondo suavemente gris */
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #333;
+/* --- Paleta de Colores y Variables Minimalistas --- */
+:root {
+  --color-accent: #2563eb; /* Azul como único color de acento */
+  --color-surface: #ffffff;
+  --color-background: #f9fafb; /* Un gris casi imperceptible */
+  --color-text-primary: #111827;
+  --color-text-secondary: #6b7280;
+  --color-border: #e5e7eb;
+  --color-success: #16a34a;
+  --color-danger: #dc2626;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --border-radius: 8px;
 }
 
-/* Contenedor principal de la página */
+/* --- ANIMACIÓN DE ENTRADA --- */
+
 .main-card {
-  background-color: #ffffff;
-  padding: 2.5rem;
-  border-radius: 1.25rem; /* Esquinas más redondeadas */
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* Sombra suave */
+  /* Se aplica la animación al cargar la tarjeta */
+  animation: fadeIn 0.6s ease-out;
 }
 
-/* Estilos de tabla modernos */
-.table {
-  border-radius: 1rem;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- Estilos Generales --- */
+body {
+  background-color: var(--color-background);
+  font-family: var(--font-sans);
+  color: var(--color-text-primary);
+}
+
+/* --- Contenedor Principal (Ahora solo una tarjeta con borde) --- */
+.main-card {
+  background-color: var(--color-surface);
+  padding: 2.5rem;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--color-border);
+  box-shadow: none; /* Sin sombras */
+}
+
+/* --- Cabecera de la Página --- */
+.page-header {
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.page-header h2 {
+  font-weight: 700;
+  font-size: 1.75rem;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.page-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* --- Estilos de Tabla Minimalista --- */
+.table-wrapper {
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); /* Sombra sutil para la tabla */
-  border: 1px solid #dee2e6; /* Borde sutil */
+}
+
+.table {
+  margin: 0;
 }
 
 .table thead {
-  background-color: #1d3557; /* Un color de cabecera profesional */
-  color: white;
-  border-bottom: none;
+  background-color: #f9fafb;
 }
 
-.table th {
-  padding: 1.2rem;
+.table thead th {
+  padding: 0.75rem 1.5rem;
   font-weight: 600;
-  border-bottom: none !important;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border);
 }
 
-.table td {
-  padding: 1rem 1.2rem;
-  border-top: 1px solid #dee2e6;
+.table tbody tr {
+  transition: background-color 0.15s ease-in-out;
 }
 
 .table tbody tr:hover {
-  background-color: #f8f9fa; /* Efecto hover más sutil */
-
-  transition: transform 0.2s ease-in-out;
+  background-color: #f9fafb; /* Hover muy sutil */
 }
 
-/* Estilos para badges (estados) */
+.table td {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+/* --- Badges Estilo "Tag" --- */
 .badge {
-  font-size: 0.8rem;
   font-weight: 600;
-  padding: 0.5em 0.8em;
-  border-radius: 1rem;
+  padding: 0.25em 0.75em;
+  border-radius: 6px;
+  background-color: transparent !important; /* Fondo transparente */
+  border: 1px solid currentColor; /* Borde del color del texto */
+  font-size: 0.8rem;
 }
 
 .badge.bg-success {
-  background: linear-gradient(45deg, #28a745, #218838) !important;
-  box-shadow: 0 2px 6px rgba(40, 167, 69, 0.2);
+  color: var(--color-success) !important;
 }
 
 .badge.bg-danger {
-  background: linear-gradient(45deg, #dc3545, #c82333) !important;
-  box-shadow: 0 2px 6px rgba(220, 53, 69, 0.2);
+  color: var(--color-danger) !important;
 }
 
 .badge.bg-secondary {
-  background: linear-gradient(45deg, #6c757d, #5a6268) !important;
-  box-shadow: 0 2px 6px rgba(108, 117, 125, 0.2);
+  color: var(--color-text-secondary) !important;
 }
 
-/* Estilos de botones con gradiente y sombra */
-.btn-sm.btn-warning, .btn.btn-success {
-  border-radius: 2rem;
-  font-weight: 500;
-  transition: all 0.2s ease-in-out;
+/* --- Botones Minimalistas --- */
+.btn {
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  padding: 0.6rem 1.2rem;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  box-shadow: none;
+  transition: all 0.15s ease;
 }
 
-.btn.btn-success {
-  background: linear-gradient(45deg, #28a745, #218838);
-  border: none;
-  box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
+.btn:hover {
+  border-color: #d1d5db;
+  background-color: #f9fafb;
 }
 
-.btn.btn-success:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(40, 167, 69, 0.3);
-}
-
-.btn-sm.btn-warning {
-  background: linear-gradient(45deg, #ffc107, #e0a800);
-  border: none;
+.btn-primary {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
   color: white;
-  box-shadow: 0 4px 10px rgba(255, 193, 7, 0.2);
+}
+.btn-primary:hover {
+  background-color: #1d4ed8;
+  border-color: #1d4ed8;
 }
 
-.btn-sm.btn-warning:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(255, 193, 7, 0.3);
-}
-
-.btn-sm.btn-danger {
-  background: linear-gradient(45deg, #dc3545, #c82333);
+/* Botones de acción en la tabla */
+.action-buttons .btn {
+  background-color: transparent;
+  color: var(--color-text-secondary);
   border: none;
-  color: white;
-  box-shadow: 0 4px 10px rgba(220, 53, 69, 0.2);
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 50%; /* Circulares */
+}
+.action-buttons .btn:hover {
+  background-color: #f3f4f6;
+  color: var(--color-text-primary);
 }
 
-.btn-sm.btn-danger:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(220, 53, 69, 0.3);
-}
-
-.btn-sm.btn-primary {
-  background: linear-gradient(45deg, #007bff, #0056b3);
-  border: none;
-  color: white;
-  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
-}
-
-.btn-sm.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(0, 123, 255, 0.3);
-}
-
-/* Estilos de modales */
+/* --- Modales Limpios --- */
 .modal-content {
-  border-radius: 1.5rem;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
 }
 
+.modal-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+.modal-header .modal-title {
+  font-weight: 600;
+  font-size: 1.25rem;
+  color: var(--color-text-primary);
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+.modal-footer {
+  padding: 1rem 1.5rem;
+  background-color: #f9fafb;
+  border-top: 1px solid var(--color-border);
+}
+
+/* Formularios */
+.form-control, .form-select {
+    border-color: var(--color-border);
+}
+.form-control:focus, .form-select:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+/* --- CÓDIGO PARA ESTIRAR LA TABLA A PANTALLA COMPLETA --- */
+
+/* 1. Hacemos que el body y el html ocupen el 100% de la altura */
+html, body {
+  height: 100%;
+}
+
+/* 2. Convertimos el body en un contenedor flexible en columna */
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 3. Hacemos que el contenedor principal y la tarjeta crezcan */
+.container {
+  flex-grow: 1; /* Le dice al contenedor que ocupe el espacio sobrante */
+  display: flex;
+  flex-direction: column;
+}
+
+.main-card {
+  flex-grow: 1; /* Le dice a la tarjeta que crezca dentro del contenedor */
+  display: flex;
+  flex-direction: column;
+}
+
+/* 4. Finalmente, hacemos que el contenedor de la tabla se estire */
+.table-wrapper {
+  flex-grow: 1; /* Le dice al wrapper que ocupe el espacio sobrante en la tarjeta */
+  overflow-y: auto; /* IMPORTANTE: Si hay muchas filas, el scroll aparecerá AQUÍ */
+}
+
+/* --- CÓDIGO PARA CORREGIR Y ESTIRAR LA COLUMNA DE ACCIONES --- */
+
+/* Seleccionamos la última celda (la de Acciones) en cada fila de la tabla */
+.table td:last-child {
+  /* Propiedad CLAVE: Evita que los elementos se partan en varias líneas */
+  white-space: nowrap;
+}
+
+/* --- ESTILOS MODERNOS PARA LOS MODALES --- */
+
+/* Contenedor principal del modal */
+.modal-content {
+  border: none;
+  border-radius: 16px; /* Bordes más redondeados */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Encabezado del modal */
+.modal-header {
+  background-color: #f8f9fa; /* Fondo gris claro, como el navbar */
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+/* Título del modal */
+.modal-title {
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #212529;
+}
+
+/* Quitamos los fondos de color completos y los reemplazamos por un borde superior */
+.modal-header.bg-success, .modal-header.bg-warning {
+  background-color: #f8f9fa !important; /* Forzamos el fondo neutro */
+  color: #212529 !important; /* Forzamos el texto oscuro */
+  border-top: 4px solid; /* Creamos un espacio para el borde de color */
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+}
+
+/* Asignamos el color del borde superior según la acción */
 .modal-header.bg-success {
-  background-color: #28a745 !important;
-  border-top-left-radius: 1.5rem;
-  border-top-right-radius: 1.5rem;
+  border-top-color: #198754; /* Verde para "Crear" */
 }
-
 .modal-header.bg-warning {
-  background-color: #ffc107 !important;
-  border-top-left-radius: 1.5rem;
-  border-top-right-radius: 1.5rem;
+  border-top-color: #ffc107; /* Amarillo para "Editar" */
 }
 
-.btn-close.btn-close-white {
-  filter: brightness(0) invert(1);
+/* Botón de cerrar (X) */
+.modal-header .btn-close {
+  filter: none; /* Quitamos el filtro blanco que ya no es necesario */
 }
+
+/* Cuerpo del modal y formularios */
+.modal-body {
+  padding: 2rem;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.5rem;
+}
+
+.form-control, .form-select {
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  transition: all 0.2s ease;
+}
+
+.form-control:focus, .form-select:focus {
+  background-color: #fff;
+  border-color: #FFEB3B; /* Borde amarillo al hacer foco */
+  box-shadow: 0 0 0 3px rgba(255, 235, 59, 0.3);
+}
+
+/* Pie del modal */
+.modal-footer {
+  background-color: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+  padding: 1rem 2rem;
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+}
+
+/* Botones dentro del pie del modal */
+.modal-footer .btn {
+  background-color: #FFEB3B; /* Usamos el amarillo de la marca */
+  color: #212529;
+  border: none;
+  border-radius: 50rem;
+  font-weight: 700;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.2s ease;
+}
+
+.modal-footer .btn:hover {
+  background-color: #facc15;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+/* --- ANIMACIÓN DE ENTRADA --- */
+
+.main-card {
+  /* Se aplica la animación al cargar la tarjeta */
+  animation: fadeIn 0.6s ease-out;
+}
+

@@ -1,74 +1,81 @@
-body {
-    background-color: #f0f2f5;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #333;
+/* --- ESTILOS PARA FORMULARIO POR PASOS --- */
+
+/* Barra de progreso */
+.progress-bar-container {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 3rem;
+  position: relative;
+}
+.progress-bar-container::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  height: 2px;
+  width: 100%;
+  background-color: #dee2e6;
+  z-index: 1;
+}
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 2;
+  background-color: #ffffff; /* Para que esté por encima de la línea */
+  padding: 0 1rem;
+}
+.step-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #f8f9fa;
+  border: 2px solid #dee2e6;
+  color: #6c757d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  transition: all 0.3s ease;
+}
+.step-label {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6c757d;
+  transition: all 0.3s ease;
+}
+.step.active .step-icon {
+  background-color: #FFEB3B;
+  border-color: #FFEB3B;
+  color: #212939;
+}
+.step.active .step-label {
+  color: #212939;
 }
 
-.card-nino {
-    background-color: #ffffff;
-    border-radius: 1.25rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
+/* Lógica de mostrar/ocultar pasos */
+.form-step {
+  display: none;
+  animation: fadeIn 0.5s;
+}
+.form-step.active {
+  display: block;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.card-header-nino {
-    background-color: #1d3557;
-    color: #ffffff;
-    font-size: 1.25rem;
-    font-weight: 600;
-    padding: 1.5rem 2rem;
+/* Botones de navegación */
+.form-navigation {
+  margin-top: 2.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
-
-.card-header-nino.secondary {
-    background-color: #457b9d;
-}
-
-.card-header-nino.info {
-    background-color: #1abc9c;
-}
-
-.form-label {
-    font-weight: 500;
-    color: #555;
-}
-
-.form-control, .form-select {
-    border-radius: 0.75rem;
-    border: 1px solid #ced4da;
-    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-}
-
-.form-control:focus, .form-select:focus {
-    border-color: #457b9d;
-    box-shadow: 0 0 0 0.25rem rgba(69, 123, 157, 0.25);
-}
-
-.btn-lg {
-    font-size: 1.1rem;
-    font-weight: 600;
-    padding: 0.75rem 1.5rem;
-    border-radius: 2rem;
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-}
-
-.btn-success {
-    background: linear-gradient(45deg, #28a745, #218838);
-    border: none;
-    box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
-}
-
-.btn-success:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(40, 167, 69, 0.3);
-}
-
-.documento-group {
-    border: 1px dashed #ced4da;
-    border-radius: 0.75rem;
-    padding: 1rem;
-    margin-bottom: 1rem;
-}
-
-.documento-group:last-child {
-    margin-bottom: 0;
+/* Empuja el botón "Siguiente" a la derecha cuando está solo */
+.form-navigation:has(.next-btn:only-child) {
+  justify-content: flex-end;
 }

@@ -1,39 +1,61 @@
+/* --- ESTILO NAVBAR RECOMENDADO: NEUTRO Y PROFESIONAL --- */
+
+/* Contenedor principal de la barra */
 .navbar {
-  background: linear-gradient(90deg, #1d3557, #457b9d);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  padding: 0.8rem 1rem;
+  background-color: #f8f9fa; /* Un fondo gris muy claro, neutro y profesional */
+  padding: 0.75rem 2rem;
+  border-bottom: 1px solid #dee2e6; /* Borde estándar para separación */
 }
 
+/* Marca/Logo "FUNDAL" */
 .navbar-brand {
-  font-weight: bold;
-  font-size: 1.4rem;
-  color: #f1faee !important;
-  letter-spacing: 1px;
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: #212529 !important; /* Texto principal oscuro */
 }
 
+/* Enlaces de navegación */
 .navbar-nav .nav-link {
-  color: #f1faee !important;
-  font-weight: 500;
-  margin-right: 1rem;
-  transition: color 0.3s ease-in-out;
+  color: #495057 !important; /* Texto secundario un poco más suave */
+  font-weight: 600;
+  margin: 0 0.25rem;
+  padding: 0.5rem 0.25rem;
+  position: relative;
+  transition: all 0.2s ease-in-out;
+  border-bottom: 2px solid transparent;
 }
 
+/* Efecto hover para los enlaces */
 .navbar-nav .nav-link:hover {
-  color: #a8dadc !important;
+  color: #000000 !important; /* Texto se vuelve negro al pasar el mouse */
 }
 
+/* Estilo para el enlace de la página ACTIVA: aquí usamos el acento amarillo */
+.navbar-nav .nav-link.active {
+  color: #212529 !important;
+  font-weight: 700;
+  border-bottom-color: #FFEB3B; /* La línea inferior es del color de tu marca */
+}
+
+/* Texto de bienvenida al usuario */
 .navbar-text {
-  color: #f1faee;
-  font-style: italic;
+  color: #6c757d; /* Color de texto silenciado estándar */
+  font-size: 0.9rem;
 }
 
+/* Botón de Cerrar Sesión: el otro punto de acento amarillo */
 .btn-outline-light {
-  border-radius: 20px;
-  font-weight: 500;
-  transition: all 0.3s ease;
+  background-color: #FFEB3B;
+  color: #212529; /* Texto oscuro para contraste sobre amarillo */
+  border: none;
+  border-radius: 50rem;
+  font-weight: 700; /* Hacemos el texto más grueso */
+  padding: 0.5rem 1.25rem;
+  transition: all 0.2s ease;
 }
 
 .btn-outline-light:hover {
-  background-color: #f1faee;
-  color: #1d3557;
+  background-color: #facc15; /* Amarillo un poco más oscuro */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
