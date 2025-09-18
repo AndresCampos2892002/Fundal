@@ -21,12 +21,16 @@ const io = new Server(server);
 const PORT = process.env.PORT || 3000;
 
 // Configuración de base de datos
+
 const pool = new Pool({
-  user: process.env.DB_USER,
   host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
+  user: process.env.DB_USER,
   password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
   port: process.env.DB_PORT,
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 // app.locals.pool = pool; // Esta línea no es necesaria si los controladores importan 'db.js'
 
