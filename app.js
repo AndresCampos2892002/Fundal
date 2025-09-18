@@ -6,9 +6,16 @@ const { Pool } = require('pg');
 // const bcrypt = require('bcrypt'); // No se usa directamente en este archivo
 // const jwt = require('jsonwebtoken'); // No se usa directamente en este archivo
 const flash = require('connect-flash');
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config();
-}
+const pool = new Pool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT,
+  ssl: process.env.NODE_ENV === 'production' ? {
+    rejectUnauthorized: false
+  } : false
+});
 
 // --- INTEGRACIÓN DE SOCKET.IO (AÑADIDO) ---
 const http = require('http');
@@ -21,18 +28,6 @@ const io = new Server(server);
 const PORT = process.env.PORT || 3000;
 
 // Configuración de base de datos
-
-const pool = new Pool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT,
-  ssl: {
-    rejectUnauthorized: false
-  }
-});
-// app.locals.pool = pool; // Esta línea no es necesaria si los controladores importan 'db.js'
 
 // Middleware
 app.set('view engine', 'ejs');
