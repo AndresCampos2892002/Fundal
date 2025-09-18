@@ -6,7 +6,9 @@ const { Pool } = require('pg');
 // const bcrypt = require('bcrypt'); // No se usa directamente en este archivo
 // const jwt = require('jsonwebtoken'); // No se usa directamente en este archivo
 const flash = require('connect-flash');
-require('dotenv').config();
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
 
 // --- INTEGRACIÓN DE SOCKET.IO (AÑADIDO) ---
 const http = require('http');
