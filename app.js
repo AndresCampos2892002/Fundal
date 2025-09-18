@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
@@ -6,16 +8,7 @@ const { Pool } = require('pg');
 // const bcrypt = require('bcrypt'); // No se usa directamente en este archivo
 // const jwt = require('jsonwebtoken'); // No se usa directamente en este archivo
 const flash = require('connect-flash');
-const pool = new Pool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT,
-  ssl: process.env.NODE_ENV === 'production' ? {
-    rejectUnauthorized: false
-  } : false
-});
+
 
 // --- INTEGRACIÓN DE SOCKET.IO (AÑADIDO) ---
 const http = require('http');
@@ -38,7 +31,7 @@ app.use(flash());
 
 // --- SEPARACIÓN DEL MIDDLEWARE DE SESIÓN PARA REUTILIZARLO (MODIFICADO) ---
 const sessionMiddleware = session({
-  secret: 'clave-secreta-fundal',
+  secret: 'clave-secreta-fundal-produccion',
   resave: false,
   saveUninitialized: false
 });
