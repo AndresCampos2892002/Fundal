@@ -1,23 +1,23 @@
 const { Pool } = require('pg');
 
-// Debug de variables
 console.log('🔍 DATABASE_URL:', process.env.DATABASE_URL ? 'EXISTE' : 'NO EXISTE');
 console.log('🔍 NODE_ENV:', process.env.NODE_ENV);
 
+// Configuración CORRECTA para SSL de Railway
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? {
-    rejectUnauthorized: false
-  } : false,
-  connectionTimeoutMillis: 10000,
-  idleTimeoutMillis: 30000
+  ssl: {
+    rejectUnauthorized: false, // ← Esto es IMPORTANTE
+    require: true
+  }
 });
 
 pool.connect()
   .then(() => console.log("✅ Conectado a PostgreSQL en Railway"))
   .catch(err => {
-    console.error("❌ Error de conexión:", err.message);
-    console.error("Usando DATABASE_URL:", process.env.DATABASE_URL);
+    console.error("❌ Error de conexión:");
+    console.error(" - Mensaje:", err.message);
+    console.error(" - SSL Config:", pool.options.ssl);
   });
 
 module.exports = pool;
