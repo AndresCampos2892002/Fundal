@@ -1,5 +1,3 @@
-require('dotenv').config();
-
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
@@ -8,7 +6,7 @@ const { Pool } = require('pg');
 // const bcrypt = require('bcrypt'); // No se usa directamente en este archivo
 // const jwt = require('jsonwebtoken'); // No se usa directamente en este archivo
 const flash = require('connect-flash');
-
+require('dotenv').config();
 
 // --- INTEGRACIÓN DE SOCKET.IO (AÑADIDO) ---
 const http = require('http');
@@ -21,6 +19,14 @@ const io = new Server(server);
 const PORT = process.env.PORT || 3000;
 
 // Configuración de base de datos
+const pool = new Pool({
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASS,
+  port: process.env.DB_PORT,
+});
+// app.locals.pool = pool; // Esta línea no es necesaria si los controladores importan 'db.js'
 
 // Middleware
 app.set('view engine', 'ejs');
@@ -31,7 +37,7 @@ app.use(flash());
 
 // --- SEPARACIÓN DEL MIDDLEWARE DE SESIÓN PARA REUTILIZARLO (MODIFICADO) ---
 const sessionMiddleware = session({
-  secret: 'clave-secreta-fundal-produccion',
+  secret: 'clave-secreta-fundal',
   resave: false,
   saveUninitialized: false
 });
@@ -194,4 +200,3 @@ app.post('/eventos', async (req, res) => {
 server.listen(PORT, () => {
   console.log(`✅ Servidor corriendo en http://localhost:${PORT}`);
 });
-
