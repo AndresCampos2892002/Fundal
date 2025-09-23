@@ -62,13 +62,40 @@ exports.getUnreadCount = async (req, res) => {
             [currentUserId]
         );
 
-        // El resultado de COUNT(*) es un string, lo convertimos a número
         const unreadCount = parseInt(rows[0].count, 10);
-
         res.json({ unreadCount });
 
     } catch (err) {
         console.error('❌ Error al obtener el contador de no leídos:', err);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+};
+
+/**
+ * NUEVO: Devuelve los mensajes no leídos por usuario para el chat
+ * Formato: { success: true, unreadMessages: { userId1: count, userId2: count } }
+ */
+exports.getUnreadMessagesByUser = async (req, res) => {
+    try {
+        const currentUserId = req.session.user.id;
+
+        const { rows } = await pool.query(
+            `SELECT de_usuario_id AS userId, COUNT(*) AS count
+             FROM mensajes
+             WHERE para_usuario_id = $1 AND leido = FALSE
+             GROUP BY de_usuario_id`,
+            [currentUserId]
+        );
+
+        const unreadMessages = {};
+        rows.forEach(row => {
+            unreadMessages[row.userid] = parseInt(row.count, 10);
+        });
+
+        res.json({ success: true, unreadMessages });
+
+    } catch (err) {
+        console.error('❌ Error al obtener mensajes no leídos por usuario:', err);
         res.status(500).json({ error: 'Error interno del servidor' });
     }
 };

@@ -1,41 +1,25 @@
-// routes/chatRoutes.js
 const express = require('express');
 const router = express.Router();
 const ctrl = require('../controllers/chatController');
 
-// Middleware para asegurar que el usuario ha iniciado sesión
+// Middleware para asegurar sesión
 const ensureSession = (req, res, next) => {
     if (!req.session.user) {
-        // Para una API, es mejor devolver un error JSON que redirigir a una página.
         return res.status(401).json({ error: 'No autorizado' });
     }
     next();
 };
 
-// ==================================================================
-// =========== INICIO DE LA CORRECCIÓN: RUTAS TIPO API ==============
-// ==================================================================
+// ===================== RUTAS API =====================
 
-// Ruta API para obtener la lista de usuarios para el chat.
-// El frontend (chat.js) llamará a GET /chat/users
+// Obtener lista de usuarios para el chat
 router.get('/users', ensureSession, ctrl.getChatUsers);
 
-// Ruta API para obtener el historial de mensajes con un usuario específico.
-// El frontend (chat.js) llamará a GET /chat/history/123 (donde 123 es el ID del contacto)
+// Obtener historial de mensajes con un usuario específico
 router.get('/history/:contactId', ensureSession, ctrl.getMessageHistory);
 
-// ==================================================================
-// ============ FIN DE LA CORRECCIÓN: RUTAS TIPO API ================
-// ==================================================================
+// Obtener mensajes no leídos por usuario actual
+router.get('/unread-messages', ensureSession, ctrl.getUnreadCount);
 
-module.exports = router;
-
-// routes/chat.js (o tu archivo de rutas principal)
-// ... tus otras rutas de chat ...
-router.get('/users', ensureSession, ctrl.getChatUsers);
-router.get('/history/:contactId', ensureSession, ctrl.getMessageHistory);
-
-// ✅ NUEVA RUTA: Para saber si hay mensajes sin leer
-router.get('/unread-count', ensureSession, ctrl.getUnreadCount);
-
+// Exportar router
 module.exports = router;

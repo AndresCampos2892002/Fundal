@@ -12,6 +12,7 @@ function ensureSession(req, res, next) {
   next();
 }
 
+
 // GET: Ver calendario (eventos + notas personales del usuario)
 router.get('/', ensureSession, async (req, res) => {
   try {
@@ -110,6 +111,69 @@ router.get('/notificaciones', ensureSession, async (req, res) => {
     res.json({ ok: false, data: [] });
   }
 });
+
+// DELETE: eliminar nota
+router.post('/nota/eliminar', ensureSession, async (req, res) => {
+  const { id } = req.body;
+  try {
+    await pool.query('DELETE FROM notas_personales WHERE id=$1 AND usuario_id=$2', [id, req.session.user.id]);
+    req.flash('success_msg', 'Nota eliminada correctamente.');
+    res.redirect('/calendar');
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'Error al eliminar la nota.');
+    res.redirect('/calendar');
+  }
+});
+
+// POST: editar nota
+router.post('/nota/editar', ensureSession, async (req, res) => {
+  const { id, nota, hora } = req.body;
+  try {
+    await pool.query(
+      'UPDATE notas_personales SET nota=$1, hora=$2 WHERE id=$3 AND usuario_id=$4',
+      [nota, hora || null, id, req.session.user.id]
+    );
+    req.flash('success_msg', 'Nota actualizada correctamente.');
+    res.redirect('/calendar');
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'Error al actualizar la nota.');
+    res.redirect('/calendar');
+  }
+});
+
+// DELETE: eliminar evento
+router.post('/evento/eliminar', ensureSession, async (req, res) => {
+  const { id } = req.body;
+  try {
+    await pool.query('DELETE FROM eventos WHERE id=$1 AND usuario_id=$2', [id, req.session.user.id]);
+    req.flash('success_msg', 'Evento eliminado correctamente.');
+    res.redirect('/calendar');
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'Error al eliminar el evento.');
+    res.redirect('/calendar');
+  }
+});
+
+// POST: editar evento
+router.post('/evento/editar', ensureSession, async (req, res) => {
+  const { id, titulo, descripcion, hora } = req.body;
+  try {
+    await pool.query(
+      'UPDATE eventos SET titulo=$1, descripcion=$2, hora=$3 WHERE id=$4 AND usuario_id=$5',
+      [titulo, descripcion || '', hora || null, id, req.session.user.id]
+    );
+    req.flash('success_msg', 'Evento actualizado correctamente.');
+    res.redirect('/calendar');
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'Error al actualizar el evento.');
+    res.redirect('/calendar');
+  }
+});
+
 
 
 module.exports = router;
