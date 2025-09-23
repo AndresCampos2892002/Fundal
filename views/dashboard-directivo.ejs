@@ -75,36 +75,35 @@
     </div>
   </main>
 
-   <!-- Botón Flotante que AHORA abre el widget (ya no es un enlace) -->
-     <div class="chat-fab-wrapper" id="chatFab" title="Abrir Chat">
-       <i class="fas fa-comments"></i>
-       <span>Chat</span>
-     </div>
+  <div class="chat-fab-wrapper" id="chatFab" title="Abrir Chat">
+      <i class="fas fa-comments"></i>
+      <span>Chat</span>
+      <span id="notification-dot" class="notification-dot hidden"></span>
+  </div>
 
-     <!-- Contenedor del Widget de Chat (inicialmente oculto) -->
-     <div class="chat-widget-container hidden" id="chat-widget">
+   <div class="chat-widget-container hidden" id="chat-widget">
        <div class="chat-widget-header">
-         <h5 class="mb-0">Chat Interno</h5>
-         <button class="btn-close btn-close-white" id="chat-close-btn"></button>
+           <h5 class="mb-0">Chat Interno</h5>
+           <button class="btn-close btn-close-white" id="chat-close-btn"></button>
        </div>
        <div class="chat-widget-body">
-         <div class="chat-user-list" id="chat-user-list">
-           <div class="p-3 text-center text-muted">Cargando usuarios...</div>
-         </div>
-         <div class="chat-conversation">
-           <div class="chat-conversation-header" id="chat-conversation-header">
-             Selecciona un usuario
+           <div class="chat-user-list" id="chat-user-list">
+               <div class="p-3 text-center text-muted">Cargando usuarios...</div>
            </div>
-           <div class="chat-messages" id="chat-messages"></div>
-           <div class="chat-input-area hidden" id="chat-input-area">
-             <form id="message-form" class="d-flex">
-               <input type="text" id="message-input" class="form-control" placeholder="Escribe un mensaje..." autocomplete="off">
-               <button type="submit" class="btn btn-primary ms-2"><i class="fas fa-paper-plane"></i></button>
-             </form>
+           <div class="chat-conversation">
+               <div class="chat-conversation-header" id="chat-conversation-header">
+                   Selecciona un usuario
+               </div>
+               <div class="chat-messages" id="chat-messages"></div>
+               <div class="chat-input-area hidden" id="chat-input-area">
+                   <form id="message-form" class="d-flex">
+                       <input type="text" id="message-input" class="form-control" placeholder="Escribe un mensaje..." autocomplete="off">
+                       <button type="submit" class="btn btn-primary ms-2"><i class="fas fa-paper-plane"></i></button>
+                   </form>
+               </div>
            </div>
-         </div>
        </div>
-     </div>
+   </div>
 
    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 

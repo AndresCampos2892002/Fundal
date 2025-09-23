@@ -30,3 +30,12 @@ router.get('/history/:contactId', ensureSession, ctrl.getMessageHistory);
 
 module.exports = router;
 
+// routes/chat.js (o tu archivo de rutas principal)
+// ... tus otras rutas de chat ...
+router.get('/users', ensureSession, ctrl.getChatUsers);
+router.get('/history/:contactId', ensureSession, ctrl.getMessageHistory);
+
+// ✅ NUEVA RUTA: Para saber si hay mensajes sin leer
+router.get('/unread-count', ensureSession, ctrl.getUnreadCount);
+
+module.exports = router;

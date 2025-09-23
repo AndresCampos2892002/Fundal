@@ -49,3 +49,26 @@ exports.getMessageHistory = async (req, res) => {
     }
 };
 
+/**
+ * Devuelve la cantidad de mensajes no leídos para el usuario actual.
+ */
+exports.getUnreadCount = async (req, res) => {
+    try {
+        const currentUserId = req.session.user.id;
+
+        const { rows } = await pool.query(
+            // Contamos los mensajes donde el destinatario es el usuario actual y 'leido' es FALSE
+            'SELECT COUNT(*) FROM mensajes WHERE para_usuario_id = $1 AND leido = FALSE',
+            [currentUserId]
+        );
+
+        // El resultado de COUNT(*) es un string, lo convertimos a número
+        const unreadCount = parseInt(rows[0].count, 10);
+
+        res.json({ unreadCount });
+
+    } catch (err) {
+        console.error('❌ Error al obtener el contador de no leídos:', err);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+};

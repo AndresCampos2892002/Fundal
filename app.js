@@ -3,6 +3,7 @@ const session = require('express-session');
 const path = require('path');
 const bodyParser = require('body-parser');
 const { Pool } = require('pg');
+const { startScheduledJobs } = require('./lib/scheduler');
 // const bcrypt = require('bcrypt'); // No se usa directamente en este archivo
 // const jwt = require('jsonwebtoken'); // No se usa directamente en este archivo
 const flash = require('connect-flash');
@@ -195,4 +196,6 @@ app.post('/eventos', async (req, res) => {
 // Ahora usamos 'server.listen' en lugar de 'app.listen' para que socket.io funcione
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ Servidor corriendo en el puerto ${PORT}`);
+
+  startScheduledJobs(); //esta funcion borra los mensaje del chat
 });
