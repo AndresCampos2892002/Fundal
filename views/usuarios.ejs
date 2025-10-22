@@ -68,7 +68,13 @@
                 <td><small class="text-muted"><%= u.id %></small></td>
                 <td><strong><%= u.username %></strong></td>
                 <td><%= u.email %></td>
-                <td><span class="badge"><%= u.rol %></span></td>
+                <td>
+                  <span class="badge">
+                    <% if (u.rol === 'Secretaria') { %> Colaborador
+                    <% } else { %>
+                      <%= u.rol %> <% } %>
+                  </span>
+                </td>
                 <td class="text-end">
                   <button type="button" class="btn btn-icon" title="Editar" data-bs-toggle="modal" data-bs-target="#modalEditarUsuario" data-id="<%= u.id %>" data-username="<%= u.username %>" data-email="<%= u.email %>" data-rol="<%= u.rol %>">
                     <i class="fas fa-pencil-alt"></i>
