@@ -20,6 +20,7 @@ const checkEditPermission = (req, res, next) => {
   next();
 };
 const isDirectivo = (req) => req.session.user && (req.session.user.rol === 'Secretaria' || req.session.user.rol === 'Directivo');
+
 function checkDirectivoPermission(req, res, next) {
   if (!isDirectivo(req)) {
     req.flash('error_msg', '🔒 Solo el Directivo puede realizar esta acción.');
@@ -41,59 +42,145 @@ const postulacionValidator = [
 // LISTAR (FUSIONADO: Muestra quién registró y maneja el mensaje especial)
 exports.listar = [ensureSession, async (req, res) => {
   try {
+
+    // Consulta explícita que nombra cada columna para evitar errores
     let q = `
-      SELECT p.*, u.username AS creado_por_usuario
-      FROM postulaciones p
-      LEFT JOIN users u ON p.usuario_id = u.id
+      SELECT
+        p.id, p.fecha_visita, p.medio_comunicacion, p.estado, p."nombre_niño",
+        p.fecha_nacimiento, p.edad, p.direccion, p.nombre_madre, p.nombre_padre,
+        p.telefono, p.telefono_padre, p.dificultad_auditiva, p.dificultad_visual,
+        p.referido_por, p.programa_asignado, p.notas_seguimiento, p.conclusiones,
+        p.grado, p.observaciones, p.diagnostico, p.tipo_apoyo, p.atendido_por,
+        p.archivado, -- Se añade para futuras lógicas si es necesario
+        u.username AS creado_por_usuario
+      FROM
+        postulaciones p
+      LEFT JOIN
+        users u ON p.usuario_id = u.id
+      WHERE
+        p.archivado = FALSE -- Se asegura de mostrar solo las no archivadas
     `;
     let params = [];
     const nombreBusqueda = req.query.nombre || '';
+
+    // Si hay un término de búsqueda, se añade la condición a la consulta
     if (nombreBusqueda) {
-      q += `WHERE p."nombre_niño" ILIKE $1 `;
+      q += ` AND p."nombre_niño" ILIKE $1 `; // Se usa AND porque el WHERE ya existe
       params.push(`%${nombreBusqueda}%`);
     }
+
     q += `ORDER BY p.id DESC`;
+
+    // Esta es la única consulta que se ejecuta
     const { rows } = await pool.query(q, params);
 
-    // FUSIÓN: Se añade la lógica para decodificar el mensaje especial si existe
+    // El resto de la función se queda igual
     const specialMsgFlash = req.flash('special_success_msg');
     const specialMsg = specialMsgFlash.length > 0 ? JSON.parse(specialMsgFlash[0]) : null;
 
     res.render('vistaPostulaciones', {
       user: req.session.user,
       postulaciones: rows,
-      success_msg: req.flash('success_msg')[0] || null,
-      error_msg: req.flash('error_msg')[0] || null,
-      special_success_msg: specialMsg, // <-- Se pasa el mensaje especial a la vista
+      special_success_msg: specialMsg,
       nombreBusqueda: nombreBusqueda
     });
   } catch (err) {
     console.error('Error al listar postulaciones:', err);
     req.flash('error_msg', '❌ Error al cargar postulaciones.');
-    res.redirect('/');
+    req.session.save(() => res.redirect('/'));
   }
 }];
 
 // EXPORTAR EXCEL (Se mantiene tu función original)
 exports.exportarExcel = [ensureSession, async (req, res) => {
     try {
-        const { rows } = await pool.query('SELECT * FROM postulaciones ORDER BY id DESC');
+        // 1. Obtener todos los datos
+        const { rows } = await pool.query('SELECT * FROM postulaciones ORDER BY id ASC');
+
         const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet('Postulaciones');
+        workbook.creator = 'Fundal';
+        workbook.created = new Date();
+        const worksheet = workbook.addWorksheet('Reporte de Postulaciones');
+
+        // 2. Definición de Columnas (Todos los campos)
+        // Se definen los encabezados, la clave que coincide con el dato de la BD, y el ancho.
+        // También se añade formato para fechas y ajuste de texto para campos largos.
         worksheet.columns = [
-            { header: 'ID', key: 'id', width: 5 },
-            { header: 'Nombre Niño', key: 'nombre_niño', width: 30 },
-            { header: 'Fecha Nacimiento', key: 'fecha_nacimiento', width: 15 },
+            { header: 'ID', key: 'id', width: 6, style: { alignment: { horizontal: 'center' } } },
+            { header: 'Fecha de Visita', key: 'fecha_visita', width: 18, style: { numFmt: 'dd/mm/yyyy' } },
+            { header: 'Medio de Comunicación', key: 'medio_comunicacion', width: 25 },
+            { header: 'Estado', key: 'estado', width: 15 },
+            { header: 'Nombre del Niño', key: 'nombre_niño', width: 35 },
+            { header: 'Fecha de Nacimiento', key: 'fecha_nacimiento', width: 18, style: { numFmt: 'dd/mm/yyyy' } },
+            { header: 'Edad', key: 'edad', width: 8, style: { alignment: { horizontal: 'center' } } },
+            { header: 'Dirección', key: 'direccion', width: 45 },
+            { header: 'Nombre de la Madre', key: 'nombre_madre', width: 35 },
+            { header: 'Teléfono Madre', key: 'telefono', width: 18 },
+            { header: 'Nombre del Padre', key: 'nombre_padre', width: 35 },
+            { header: 'Teléfono Padre', key: 'telefono_padre', width: 18 },
+            { header: 'Dificultad Auditiva', key: 'dificultad_auditiva', width: 15 },
+            { header: 'Dificultad Visual', key: 'dificultad_visual', width: 15 },
+            { header: 'Tipo de Apoyo', key: 'tipo_apoyo', width: 25 },
+            { header: 'Referido Por', key: 'referido_por', width: 30 },
+            { header: 'Atendido Por', key: 'atendido_por', width: 30 },
+            { header: 'Programa Asignado', key: 'programa_asignado', width: 25 },
+            { header: 'Grado', key: 'grado', width: 25 },
+            { header: 'Notas de Seguimiento', key: 'notas_seguimiento', width: 60, style: { alignment: { wrapText: true } } },
+            { header: 'Conclusiones', key: 'conclusiones', width: 60, style: { alignment: { wrapText: true } } },
+            { header: 'Observaciones', key: 'observaciones', width: 60, style: { alignment: { wrapText: true } } },
+            { header: 'Diagnóstico', key: 'diagnostico', width: 60, style: { alignment: { wrapText: true } } }
         ];
-        worksheet.addRows(rows);
+
+        // 3. Formateo de Datos
+        // Convertimos valores booleanos (true/false) a texto legible ("Sí"/"No").
+        const formattedRows = rows.map(row => {
+          return {
+            ...row, // Copiamos todos los datos existentes
+            dificultad_auditiva: row.dificultad_auditiva ? 'Sí' : 'No',
+            dificultad_visual: row.dificultad_visual ? 'Sí' : 'No'
+          };
+        });
+
+        // 4. Añadir las filas con los datos ya formateados
+        worksheet.addRows(formattedRows);
+
+        // 5. Estilo Profesional para el Encabezado
+        const headerRow = worksheet.getRow(1);
+        headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 12 };
+        headerRow.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FF007BFF' } // Un azul profesional
+        };
+        headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
+
+        // 6. Estilo para todas las Celdas de Datos
+        worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+            if (rowNumber > 1) { // Omitir el encabezado
+                row.eachCell({ includeEmpty: true }, (cell) => {
+                    cell.border = {
+                        top: { style: 'thin' },
+                        left: { style: 'thin' },
+                        bottom: { style: 'thin' },
+                        right: { style: 'thin' }
+                    };
+                    // Centra verticalmente el contenido de todas las celdas
+                    cell.alignment = { ...cell.alignment, vertical: 'middle' };
+                });
+            }
+        });
+
+        // 7. Enviar el archivo al navegador
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        res.setHeader('Content-Disposition', 'attachment; filename=postulaciones.xlsx');
+        res.setHeader('Content-Disposition', 'attachment; filename=Reporte_Postulaciones_Fundal.xlsx');
+
         await workbook.xlsx.write(res);
         res.end();
+
     } catch (err) {
-        console.error('Error al exportar:', err);
-        req.flash('error_msg', 'Error al exportar a Excel.');
-        res.redirect('/postulaciones');
+        console.error('Error al exportar a Excel:', err);
+        req.flash('error_msg', '❌ Error al generar el reporte de Excel.');
+        req.session.save(() => res.redirect('/postulaciones'));
     }
 }];
 
@@ -107,7 +194,7 @@ exports.crear = [
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       req.flash('error_msg', errors.array().map(e => e.msg).join('; '));
-      return res.redirect('/postulaciones');
+      return req.session.save(() => res.redirect('/postulaciones'));
     }
     const {
       fecha_visita, medio_comunicacion, nombre_niño, fecha_nacimiento, edad, direccion, nombre_madre, telefono,
@@ -126,16 +213,20 @@ exports.crear = [
           fecha_visita || null, medio_comunicacion || null, nombre_niño, fecha_nacimiento || null, edad || null,
           direccion || null, nombre_madre || null, telefono || null, nombre_padre || null, Boolean(dificultad_auditiva),
           tipo_apoyo || null, referido_por || null, atendido_por || null, programa_asignado || null, notas_seguimiento || null,
-          conclusiones || null, grado || null, observaciones || null, estado || 'PENDIENTE', telefono_padre || null,
+          conclusiones || null, grado || null, observaciones || null, estado || 'EN PROCESO', telefono_padre || null,
           Boolean(dificultad_visual), diagnostico || null, usuarioId
         ]
       );
       req.flash('success_msg', '✅ Postulación creada.');
-      res.redirect('/postulaciones');
+      req.session.save(() => {
+              res.redirect('/postulaciones');
+      });
     } catch (err) {
       console.error('Error al crear postulación:', err);
       req.flash('error_msg', '❌ Error al crear postulación.');
-      res.redirect('/postulaciones');
+      req.session.save(() => {
+              res.redirect('/postulaciones');
+            });
     }
   }
 ];
@@ -146,19 +237,22 @@ exports.editar = [
   checkEditPermission,
   ...postulacionValidator,
   async (req, res) => {
-    // ... (Tu código de 'editar' se mantiene intacto)
+    // 1. Manejo de errores de validación con flash y redirect
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       req.flash('error_msg', errors.array().map(e => e.msg).join('; '));
-      return res.redirect('/postulaciones');
+      return req.session.save(() => res.redirect('/postulaciones'));
     }
-    const { id } = req.params;
-    const {
+
+    try {
+      const { id } = req.params;
+      const {
         fecha_visita, medio_comunicacion, nombre_niño, fecha_nacimiento, edad, direccion, nombre_madre, telefono,
         nombre_padre, dificultad_auditiva, tipo_apoyo, referido_por, atendido_por, programa_asignado, notas_seguimiento,
         conclusiones, grado, observaciones, estado, telefono_padre, dificultad_visual, diagnostico
-    } = req.body;
-    try {
+      } = req.body;
+
+      // 2. Ejecución de la consulta a la base de datos
       await pool.query(
         `UPDATE postulaciones SET
           fecha_visita=$1, medio_comunicacion=$2, "nombre_niño"=$3, fecha_nacimiento=$4, edad=$5, direccion=$6, nombre_madre=$7, telefono=$8,
@@ -170,16 +264,24 @@ exports.editar = [
           fecha_visita || null, medio_comunicacion || null, nombre_niño, fecha_nacimiento || null, edad || null,
           direccion || null, nombre_madre || null, telefono || null, nombre_padre || null, Boolean(dificultad_auditiva),
           tipo_apoyo || null, referido_por || null, atendido_por || null, programa_asignado || null, notas_seguimiento || null,
-          conclusiones || null, grado || null, observaciones || null, estado || 'PENDIENTE', telefono_padre || null,
+          conclusiones || null, grado || null, observaciones || null, estado || 'EN PROCESO', telefono_padre || null,
           Boolean(dificultad_visual), diagnostico || null, id
         ]
       );
+
+      // 3. Si todo sale bien, usa flash y redirect
       req.flash('success_msg', '✏️ Postulación editada correctamente.');
-      res.redirect('/postulaciones');
+      req.session.save(() => {
+              res.redirect('/postulaciones');
+            });
+
     } catch (err) {
+      // 4. Si ocurre un error, usa flash y redirect
       console.error('Error al editar postulación:', err);
       req.flash('error_msg', '❌ Error al editar la postulación.');
-      res.redirect('/postulaciones');
+      req.session.save(() => {
+              res.redirect('/postulaciones');
+            });
     }
   }
 ];
@@ -191,7 +293,7 @@ exports.cambiarEstado = [
   async (req, res) => {
     const { id } = req.params;
     const { estado } = req.body;
-    const estadosValidos = ['PENDIENTE', 'APROBADA', 'RECHAZADA'];
+    const estadosValidos = ['EN PROCESO', 'FINALIZADO', 'NO INICIADO'];
     if (!estadosValidos.includes((estado || '').toUpperCase())) {
       req.flash('error_msg', 'Estado inválido.');
       return res.redirect('/postulaciones');
@@ -203,10 +305,10 @@ exports.cambiarEstado = [
         [estado.toUpperCase(), id]
       );
 
-      if (estado.toUpperCase() === 'APROBADA') {
+      if (estado.toUpperCase() === 'FINALIZADO') {
         const nombreNino = updateResult.rows[0]?.nombre_niño || 'desconocido';
         const successMessage = {
-          text: `✅ Postulación de <strong>${nombreNino}</strong> actualizada a APROBADA.`,
+          text: `✅ Postulación de <strong>${nombreNino}</strong> actualizada a FINALIZADO.`,
           action: {
             url: `/crear-nino?fromPostulacion=${id}`,
             label: 'Crear Expediente Ahora'
@@ -228,22 +330,94 @@ exports.cambiarEstado = [
 ];
 
 // ELIMINAR (Se mantiene tu función original)
-exports.eliminar = [
-  ensureSession,
-  checkEditPermission,
-  async (req, res) => {
+exports.eliminar = async (req, res) => {
+  try {
     const { id } = req.params;
-    try {
-      await pool.query('DELETE FROM postulaciones WHERE id = $1', [id]);
-      req.flash('success_msg', '🗑️ Postulación eliminada correctamente.');
-      res.redirect('/postulaciones');
-    } catch (err) {
-      console.error('Error al eliminar postulación:', err);
-      req.flash('error_msg', '❌ No se pudo eliminar la postulación. Puede que tenga datos asociados.');
-      res.redirect('/postulaciones');
+    await pool.query('DELETE FROM postulaciones WHERE id = $1', [id]);
+
+    req.flash('success_msg', '✅ Postulación eliminada permanentemente.');
+    req.session.save(() => {
+            res.redirect('/postulaciones');
+          });
+  } catch (err) {
+    // 1. Captura CUALQUIER error de la base de datos
+    console.error('Error al eliminar postulación:', err); // Mantenemos el log para depuración
+
+    // 2. Comprobación Específica del Error de Llave Foránea
+    if (err.code === '23503') {
+      // Si el código es '23503', sabemos que es porque un niño depende de esta postulación.
+      req.flash('error_msg', '❌ No se puede eliminar esta postulación porque ya tiene un expediente de niño creado.');
+    } else {
+      // Para cualquier otro error inesperado, mostramos un mensaje genérico.
+      req.flash('error_msg', '❌ Ocurrió un error inesperado al intentar eliminar la postulación.');
     }
+
+    req.session.save(() => {
+            res.redirect('/postulaciones');
+          });
   }
-];
+};
+
+//ARCHIVAR LOS FINALIZADOS
+exports.archivar = async (req, res) => {
+  try {
+    const { id } = req.params;
+    // Simplemente actualizamos el estado 'archivado' a true
+    await pool.query('UPDATE postulaciones SET archivado = TRUE WHERE id = $1', [id]);
+
+    req.flash('success_msg', '✅ Postulación archivada correctamente.');
+    req.session.save(() => {
+          res.redirect(req.headers.referer || '/postulaciones');
+        });
+  } catch (err) {
+    console.error('Error al archivar la postulación:', err);
+    req.flash('error_msg', '❌ Error al archivar la postulación.');
+    req.session.save(() => {
+          res.redirect(req.headers.referer || '/postulaciones');
+        });
+  }
+};
+
+exports.listarArchivadas = async (req, res) => {
+  try {
+    // La consulta ahora busca donde 'archivado' es VERDADERO
+    const { rows } = await pool.query('SELECT * FROM postulaciones WHERE archivado = TRUE ORDER BY id DESC');
+
+    // Renderizamos una NUEVA vista llamada 'postulaciones-archivadas.ejs'
+    res.render('postulaciones-archivadas', {
+      user: req.session.user,
+      postulaciones: rows,
+      // No es necesario pasar mensajes flash aquí, pero lo mantenemos por si acaso
+      success_msg: req.flash('success_msg'),
+      error_msg: req.flash('error_msg')
+    });
+  } catch (err) {
+    console.error('Error al listar postulaciones archivadas:', err);
+    req.flash('error_msg', '❌ Error al cargar los archivados.');
+    req.session.save(() => {
+          res.redirect(req.headers.referer || '/postulaciones');
+        });
+  }
+};
+
+exports.restaurar = async (req, res) => {
+  try {
+    const { id } = req.params;
+    // Actualizamos el estado 'archivado' de vuelta a FALSE
+    await pool.query('UPDATE postulaciones SET archivado = FALSE WHERE id = $1', [id]);
+
+    req.flash('success_msg', '✅ Postulación restaurada a la lista de activas.');
+    req.session.save(() => {
+          res.redirect(req.headers.referer || '/postulaciones/archivadas');
+        });
+  } catch (err) {
+    console.error('Error al restaurar la postulación:', err);
+    req.flash('error_msg', '❌ Error al restaurar la postulación.');
+    req.session.save(() => {
+              res.redirect(req.headers.referer || '/postulaciones/archivadas');
+            });
+  }
+};
 
 exports.ensureSession = ensureSession;
 exports.checkEditPermission = checkEditPermission;

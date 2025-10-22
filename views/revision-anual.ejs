@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Revisión Anual de <%= expediente.nombre_completo %></title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="/css/postulaciones.css" rel="stylesheet">
+  <link href="/css/navbarStyles.css" rel="stylesheet">
+  <style>
+    .form-section {
+      margin-bottom: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid #dee2e6;
+    }
+    .image-preview {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover; /* Asegura que la imagen no se deforme */
+        border: 3px solid #e5e5e7;
+    }
+  </style>
+</head>
+<body>
+  <%- include('navbar') %>
+
+  <div class="container mt-5 mb-5">
+    <div class="page-header">
+      <div>
+        <h2>Revisión y Reinscripción Anual</h2>
+        <h4 class="text-muted"><%= expediente.nombre_completo %></h4>
+      </div>
+      <a href="/expedientes/<%= expediente.id %>" class="btn btn-outline-secondary"><i class="fas fa-times me-2"></i>Cancelar Revisión</a>
+    </div>
+
+    <% if (success_msg && success_msg.length > 0) { %><div class="alert alert-success"><%= success_msg %></div><% } %>
+    <% if (error_msg && error_msg.length > 0) { %><div class="alert alert-danger"><%= error_msg %></div><% } %>
+
+    <form action="/expedientes/<%= expediente.id %>/revision-anual" method="POST" enctype="multipart/form-data">
+      <div class="main-card">
+
+        <h5 class="mb-3">Paso 1: Seleccione el Nuevo Año Escolar</h5>
+        <div class="row">
+          <div class="col-md-4">
+            <label class="form-label">Año Escolar (Nuevo)*</label>
+            <select name="anio_escolar" id="anioEscolarSelect" class="form-select form-select-lg" required>
+              <option value="" disabled selected>Seleccione un año...</option>
+              <% for (let i = 2050; i >= 2020; i--) { %> <option value="<%= i %>" <%= (anioSugerido == i) ? 'selected' : '' %>><%= i %></option>
+              <% } %>
+            </select>
+          </div>
+        </div>
+
+        <div id="revisionFormContainer" class="d-none">
+
+          <div class="form-section">
+            <h5 class="mb-3">Paso 2: Revise los Datos Personales</h5>
+            <div class="row g-3">
+              <div class="col-md-9"><div class="row g-3">
+                <div class="col-md-4"><label class="form-label">Código FUNDAL</label><input type="text" name="codigo" class="form-control" readonly value="<%= expediente.codigo %>"></div>
+                <div class="col-md-8"><label class="form-label">Nombre Completo</label><input type="text" name="nombre_completo" class="form-control" readonly value="<%= expediente.nombre_completo %>"></div>
+                <div class="col-md-4"><label class="form-label">Fecha de Nacimiento*</label><input type="date" name="fecha_nacimiento" id="fechaNacimiento" class="form-control" required value="<%= expediente.fecha_nacimiento ? new Date(expediente.fecha_nacimiento).toISOString().slice(0, 10) : '' %>"></div>
+                <div class="col-md-4"><label class="form-label">Edad</label><input type="number" name="edad" id="edad" class="form-control" readonly></div>
+                <div class="col-md-4"><label class="form-label">Género*</label><select name="genero" class="form-select" required><option value="Masculino" <%= expediente.genero === 'Masculino' ? 'selected' : '' %>>Masculino</option><option value="Femenino" <%= expediente.genero === 'Femenino' ? 'selected' : '' %>>Femenino</option></select></div>
+              </div></div>
+              <div class="col-md-3 text-center">
+                <img src="/<%= expediente.foto_url.replace('public/', '') %>" id="imagePreview" class="image-preview" alt="Foto Actual">
+                <label for="fotoInput" class="btn btn-sm btn-outline-secondary mt-2">Cambiar Foto</label>
+                <input type="file" name="foto_perfil" id="fotoInput" class="d-none" accept="image/*">
+              </div>
+              <div class="col-md-4"><label class="form-label">ID Partida Nacimiento*</label><input type="text" name="id_partida_nacimiento" class="form-control" required value="<%= expediente.id_partida_nacimiento %>"></div>
+              <div class="col-md-4"><label class="form-label">Departamento*</label><input type="text" name="departamento" class="form-control" required value="<%= expediente.departamento %>"></div>
+              <div class="col-md-4"><label class="form-label">Municipio*</label><input type="text" name="municipio" class="form-control" required value="<%= expediente.municipio %>"></div>
+              <div class="col-md-4"><label class="form-label">Aldea/Comunidad*</label><input type="text" name="aldea" class="form-control" required value="<%= expediente.aldea %>"></div>
+              <div class="col-md-4"><label class="form-label">Referido por</label><input type="text" name="referido_por" class="form-control" value="<%= expediente.referido_por || '' %>"></div>
+              <div class="col-12"><label class="form-label">Diagnóstico</label><textarea name="diagnostico" class="form-control" rows="2"><%= expediente.diagnostico || '' %></textarea></div>
+              <div class="col-12"><label class="form-label">Discapacidad*</label><textarea name="discapacidad" class="form-control" required rows="2"><%= expediente.discapacidad %></textarea></div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h5 class="mb-3">Paso 3: Actualice la Información Académica</h5>
+            <div class="row g-3">
+              <div class="col-md-4"><label class="form-label">Grado*</label><input type="text" name="grado" class="form-control" required value="<%= expediente.grado || '' %>"></div>
+              <div class="col-md-4"><label class="form-label">Programa Asignado*</label><input type="text" name="programa_asignado" class="form-control" required value="<%= expediente.programa_asignado || '' %>"></div>
+              <div class="col-12 mt-3"><label class="form-label fw-bold">Docentes Asignados*</label><div class="d-flex flex-wrap border rounded p-2">
+                <% const docentesLista = ['Carolina Lenus', 'Damaris Gómez', 'Atanea Salazar', 'Darsha Salazar', 'Daniela Martinez']; %>
+                <% docentesLista.forEach(docente => { %>
+                  <div class="form-check me-4">
+                    <input class="form-check-input" type="checkbox" name="docentes" value="<%= docente %>" id="doc-<%= docente.replace(/\s/g, '') %>" <%= (expediente.docentes_asignados && expediente.docentes_asignados.includes(docente)) ? 'checked' : '' %>>
+                    <label class="form-check-label" for="doc-<%= docente.replace(/\s/g, '') %>"><%= docente %></label>
+                  </div>
+                <% }); %>
+              </div></div>
+              <div class="col-md-4"><label class="form-label">Fecha de Evaluación*</label><input type="date" name="fecha_evaluacion" class="form-control" value="<%= expediente.fecha_evaluacion ? new Date(expediente.fecha_evaluacion).toISOString().slice(0, 10) : '' %>" required></div>
+              <div class="col-md-4"><label class="form-label">Fecha Ingreso Fundal*</label><input type="date" name="fecha_ingreso_fundal" class="form-control" value="<%= expediente.fecha_ingreso_fundal ? new Date(expediente.fecha_ingreso_fundal).toISOString().slice(0, 10) : '' %>" required></div>
+              <div class="col-md-4"><label class="form-label">Fecha Ingreso MSPAS*</label><input type="date" name="fecha_ingreso_mspas" class="form-control" value="<%= expediente.fecha_ingreso_mspas ? new Date(expediente.fecha_ingreso_mspas).toISOString().slice(0, 10) : '' %>" required></div>
+              <div class="col-md-4"><label class="form-label">Dificultad Socioeconómica*</label><select name="dificultad_socioeconomica" class="form-select" required><option value="Alta" <%= expediente.dificultad_socioeconomica === 'Alta' ? 'selected' : '' %>>Alta</option><option value="Media" <%= expediente.dificultad_socioeconomica === 'Media' ? 'selected' : '' %>>Media</option><option value="Baja" <%= expediente.dificultad_socioeconomica === 'Baja' ? 'selected' : '' %>>Baja</option></select></div>
+              <div class="col-md-4"><label class="form-label">Etapa*</label><select name="etapa" class="form-select" required><option value="Primera Infancia" <%= expediente.etapa === 'Primera Infancia' ? 'selected' : '' %>>Primera Infancia</option><option value="Infancia" <%= expediente.etapa === 'Infancia' ? 'selected' : '' %>>Infancia</option><option value="Adolescencia" <%= expediente.etapa === 'Adolescencia' ? 'selected' : '' %>>Adolescencia</option></select></div>
+              <div class="col-md-4"><label class="form-label">Código MINEDUC</label><input type="text" name="codigo_mineduc" class="form-control" value="<%= expediente.codigo_mineduc || '' %>"></div>
+              <div class="col-md-4"><label class="form-label">Sede*</label><input type="text" name="sede" class="form-control" required value="<%= expediente.sede %>"></div>
+              <div class="col-12"><label class="form-label">Observaciones del Año</label><textarea name="observaciones" class="form-control" rows="3"></textarea></div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h5 class="mb-3">Paso 4: Verifique al Representante y Auxiliar</h5>
+            <div class="row g-3">
+              <div class="col-md-6"><label class="form-label">Nombre del Representante</label><input type="text" name="representante_nombre" class="form-control" value="<%= expediente.representante_nombre || '' %>"></div>
+              <div class="col-md-6"><label class="form-label">DPI</label><input type="text" name="representante_dpi" class="form-control" value="<%= expediente.representante_dpi || '' %>"></div>
+              <div class="col-md-4"><label class="form-label">Estado Civil</label><select name="estado_civil" class="form-select"><option value="Soltero/a" <%= expediente.estado_civil === 'Soltero/a' ? 'selected' : '' %>>Soltero/a</option><option value="Casado/a" <%= expediente.estado_civil === 'Casado/a' ? 'selected' : '' %>>Casado/a</option></select></div>
+              <div class="col-md-4"><label class="form-label">Parentesco</label><input type="text" name="representante_parentesco" class="form-control" value="<%= expediente.representante_parentesco || '' %>"></div>
+              <div class="col-md-4"><label class="form-label">Teléfono</label><input type="text" name="representante_telefono" class="form-control" value="<%= expediente.representante_telefono || '' %>"></div>
+              <div class="col-12"><label class="form-label">Dirección</label><input type="text" name="representante_direccion" class="form-control" value="<%= expediente.representante_direccion || '' %>"></div>
+              <div class="col-md-6"><label class="form-label">Nombre del Auxiliar (Opcional)</label><input type="text" name="auxiliar_nombre" class="form-control" value="<%= expediente.auxiliar_nombre || '' %>"></div>
+              <div class="col-md-6"><label class="form-label">Teléfono del Auxiliar</label><input type="text" name="auxiliar_telefono" class="form-control" value="<%= expediente.auxiliar_telefono || '' %>"></div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h5 class="mb-3">Paso 5: Confirme los Documentos para el Nuevo Año</h5>
+            <p class="text-muted">Marque los documentos que se entregan para el año <span class="anio-checklist-label fw-bold"></span>.</p>
+            <% const documentosLista = [
+              { grupo: 'Documentos del Estudiante', items: ['Partida de nacimiento', 'Evaluaciones médicas recientes', 'Referencia del Centro de salud', '2 fotos tamaño cédula a color'] },
+              { grupo: 'Documentos del Encargado', items: ['Copia de DPI vigente', 'Antecedentes penales del año', 'Antecedente policíacos del año', 'RENAS del año en curso'] },
+              { grupo: 'Documentos de Auxiliar (si aplica)', items: ['Carta de autorización'] }
+            ]; let docIndex = 0; %>
+            <% documentosLista.forEach(grupo => { %>
+              <h6 class="mt-4"><%= grupo.grupo %></h6><hr class="mt-1">
+              <div class="row">
+                <% grupo.items.forEach(item => { %>
+                  <div class="col-md-6"><div class="form-check">
+                    <input type="hidden" name="documentos[<%= docIndex %>][tipo]" value="<%= item %>">
+                    <input class="form-check-input" type="checkbox" name="documentos[<%= docIndex %>][confirmado]" value="true" id="doc-<%= docIndex %>">
+                    <label class="form-check-label" for="doc-<%= docIndex %>"><%= item %></label>
+                  </div></div>
+                  <% docIndex++; %>
+                <% }); %>
+              </div>
+            <% }); %>
+          </div>
+
+          <div class="d-flex justify-content-end mt-4">
+            <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-save me-2"></i>Guardar Reinscripción</button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const anioSelect = document.getElementById('anioEscolarSelect');
+      const formContainer = document.getElementById('revisionFormContainer');
+      const fechaNacimientoInput = document.getElementById('fechaNacimiento');
+      const edadInput = document.getElementById('edad');
+      const fotoInput = document.getElementById('fotoInput');
+      const imagePreview = document.getElementById('imagePreview');
+
+      // Muestra/Oculta el formulario cuando se selecciona un año
+      if (anioSelect && formContainer) {
+        anioSelect.addEventListener('change', () => {
+          if (anioSelect.value) {
+            formContainer.classList.remove('d-none');
+            document.querySelectorAll('.anio-checklist-label').forEach(el => el.textContent = anioSelect.value);
+            setTimeout(() => formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+          } else {
+            formContainer.classList.add('d-none');
+          }
+        });
+      }
+
+      // Lógica de cálculo de edad
+      if (fechaNacimientoInput && edadInput) {
+        function calcularEdad() {
+          if (!fechaNacimientoInput.value) { edadInput.value = ''; return; }
+          const birthDate = new Date(fechaNacimientoInput.value);
+          let years = new Date().getFullYear() - birthDate.getFullYear();
+          const m = new Date().getMonth() - birthDate.getMonth();
+          if (m < 0 || (m === 0 && new Date().getDate() < birthDate.getDate())) { years--; }
+          edadInput.value = years >= 0 ? years : 0;
+        }
+        fechaNacimientoInput.addEventListener('change', calcularEdad);
+        calcularEdad();
+      }
+
+      // Lógica para la vista previa de la foto
+      if (fotoInput && imagePreview) {
+        fotoInput.addEventListener('change', function() {
+          if (this.files && this.files[0]) {
+            imagePreview.src = URL.createObjectURL(this.files[0]);
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

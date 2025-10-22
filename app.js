@@ -1,38 +1,45 @@
+
+require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
 const bodyParser = require('body-parser');
 const { Pool } = require('pg');
-const { startScheduledJobs } = require('./lib/scheduler');
-// const bcrypt = require('bcrypt'); // No se usa directamente en este archivo
-// const jwt = require('jsonwebtoken'); // No se usa directamente en este archivo
 const flash = require('connect-flash');
-require('dotenv').config();
-
-// --- INTEGRACIÓN DE SOCKET.IO (AÑADIDO) ---
 const http = require('http');
 const { Server } = require("socket.io");
+const { startScheduledJobs } = require('./lib/scheduler');
 
+// Importación de Rutas
+const authController = require('./controllers/authController');
+const calendarRoutes = require('./routes/calendar');
+const routesPostulaciones = require('./routes/routesPostulaciones');
+const usuariosRouter = require('./routes/usuarios');
+const routesNino = require('./routes/routesNino');
+const routesExpedientes = require('./routes/routesExpedientes');
+const chatRoutes = require('./routes/chatRoutes');
+
+// ======================================================
+// 2. INICIALIZACIÓN
+// ======================================================
 const app = express();
-// --- CREACIÓN DEL SERVIDOR HTTP (AÑADIDO) ---
 const server = http.createServer(app);
 const io = new Server(server);
 const PORT = process.env.PORT || 3000;
 
-// Configuración de base de datos
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
-// app.locals.pool = pool; // Esta línea no es necesaria si los controladores importan 'db.js'
 
-// Middleware
+// Configuración del motor de vistas
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+
+// Middlewares para procesar datos y servir archivos estáticos (CSS, JS, imágenes)
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(flash());
 
-// --- SEPARACIÓN DEL MIDDLEWARE DE SESIÓN PARA REUTILIZARLO (MODIFICADO) ---
+// Configuración de la sesión (DEBE ir ANTES de flash y las rutas)
 const sessionMiddleware = session({
   secret: 'clave-secreta-fundal',
   resave: false,
@@ -40,7 +47,10 @@ const sessionMiddleware = session({
 });
 app.use(sessionMiddleware);
 
-// Middleware global para pasar mensajes y usuario a las vistas.
+// Middleware para mensajes flash (DEBE ir DESPUÉS de la sesión)
+app.use(flash());
+
+// Middleware global para pasar mensajes y usuario a TODAS las vistas.
 app.use((req, res, next) => {
   res.locals.success_msg = req.flash('success_msg');
   res.locals.error_msg = req.flash('error_msg');
@@ -48,11 +58,8 @@ app.use((req, res, next) => {
   next();
 });
 
+const userSockets = {};
 
-// --- LÓGICA DE SOCKET.IO PARA EL CHAT (AÑADIDO) ---
-const userSockets = {}; // Almacena qué usuario está en qué socket
-
-// Permite a socket.io acceder a los datos de la sesión de Express
 io.use((socket, next) => {
   sessionMiddleware(socket.request, {}, next);
 });
@@ -99,31 +106,23 @@ io.on('connection', (socket) => {
 
 
 // Importa las rutas
-const calendarRoutes = require('./routes/calendar');
-const routesPostulaciones = require('./routes/routesPostulaciones');
-const authController = require('./controllers/authController');
-const usuariosRouter = require('./routes/usuarios');
-const routesNino = require('./routes/routesNino');
-const routesExpedientes = require('./routes/routesExpedientes');
-const chatRoutes = require('./routes/chatRoutes'); // <-- RUTA DEL CHAT (AÑADIDO)
 
-// === RUTAS ===
 app.get('/', (req, res) => {
   res.redirect('/login');
 });
 
-// --- Rutas de Autenticación ---
+// Rutas de Autenticación
 app.get('/login', authController.mostrarLogin);
 app.post('/login', authController.procesarLogin);
 app.get('/logout', authController.logout);
 
-// --- Rutas de Módulos ---
-app.use('/chat', chatRoutes); // <-- USO DE LA RUTA DEL CHAT (AÑADIDO)
+// Rutas de Módulos
+app.use('/chat', chatRoutes);
 app.use('/calendar', calendarRoutes);
 app.use('/postulaciones', routesPostulaciones);
 app.use('/usuarios', usuariosRouter);
-app.use('/', routesNino);
 app.use('/expedientes', routesExpedientes);
+app.use('/', routesNino); // Esta ruta ahora está en el lugar correcto
 
 // --- Rutas de Dashboards (sin cambios) ---
 app.get('/dashboard-directivo', async (req, res) => {

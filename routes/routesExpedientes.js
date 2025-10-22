@@ -1,51 +1,61 @@
-// En routes/routesExpedientes.js
+// En tu archivo: /routes/routesExpedientes.js
 const express = require('express');
 const router = express.Router();
 const ctrl = require('../controllers/expedientesController');
+const { ensureSession, checkEditPermission } = require('../middlewares/authMiddleware.js');
 
-const { upload } = require('../controllers/expedientesController');
+// ✅ INICIO DE LA CORRECCIÓN: Se añade la configuración de Multer aquí
+const multer = require('multer');
+const path = require('path');
 
-// --- Middlewares de autenticación (se mantienen) ---
-const ensureSession = (req, res, next) => {
-  if (!req.session.user) {
-    req.flash('error_msg', 'Debes iniciar sesión para ver esta página.');
-    return res.redirect('/login');
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    // Define una carpeta específica para los documentos de expedientes si quieres
+    cb(null, 'public/uploads/documentos/');
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
   }
-  next();
-};
+});
+const upload = multer({ storage: storage });
+// ✅ FIN DE LA CORRECCIÓN
 
-const checkEditPermission = (req, res, next) => {
-  const hasPermission = req.session.user && (req.session.user.rol === 'Secretaria' || req.session.user.rol === 'Directivo');
-  if (!hasPermission) {
-    req.flash('error_msg', '🔒 No tienes los permisos necesarios para realizar esta acción.');
-    return res.redirect('/expedientes');
-  }
-  next();
-};
+// --- RUTAS ---
 
-// --- ORDEN DE RUTAS CORREGIDO Y AMPLIADO ---
+// Muestra la lista principal de expedientes ACTIVOS
+router.get('/', ensureSession, ctrl.listarExpedientes);
 
-// NUEVA RUTA: para ver la lista de expedientes desactivados
+// Muestra la lista de expedientes DESACTIVADOS
 router.get('/desactivados', ensureSession, checkEditPermission, ctrl.listarDesactivados);
 
-// Las rutas más específicas van PRIMERO.
-router.get('/editar/:id', ensureSession, checkEditPermission, ctrl.editarExpediente);
+// Muestra el formulario para EDITAR un expediente
+router.get('/editar/:id', ensureSession, checkEditPermission, ctrl.mostrarFormularioEditar);
 
-// Las rutas con parámetros genéricos van DESPUÉS.
+// Muestra el formulario de Revisión y Reinscripción Anual
+router.get('/:id/revision-anual', ensureSession, checkEditPermission, ctrl.mostrarFormularioRevision);
+
+// Muestra el perfil de un expediente (con o sin año)
 router.get('/:id', ensureSession, ctrl.verExpediente);
 router.get('/:id/:anio', ensureSession, ctrl.verExpediente);
 
-// El resto de las rutas
-router.get('/', ensureSession, ctrl.listarExpedientes);
-router.post('/editar/:id', ensureSession, checkEditPermission, ctrl.guardarEdicionExpediente);
-router.post('/:id/agregar-anio', ensureSession, checkEditPermission, ctrl.agregarAnioExpediente);
+// --- RUTAS POST ---
 
-// NUEVA RUTA: para procesar el cambio de estado (activar/desactivar)
+// Procesa y GUARDA los cambios del formulario de edición
+router.post('/editar/:id', ensureSession, checkEditPermission, ctrl.procesarEdicion);
+
+// Procesa y GUARDA la Revisión Anual
+router.post('/:id/revision-anual', ensureSession, checkEditPermission, ctrl.procesarRevisionAnual);
+
+// Cambia el estado de un expediente (activar/desactivar)
 router.post('/:id/toggle-estado', ensureSession, checkEditPermission, ctrl.toggleEstadoExpediente);
 
-// --- Rutas para manejar documentos (se mantienen) ---
+// --- Rutas para manejar documentos ---
+// Sube un nuevo documento para un año escolar específico
+// Ahora "upload" SÍ existe y esta línea funcionará
 router.post('/:id/:anio/documento/subir', ensureSession, checkEditPermission, upload.single('documento_archivo'), ctrl.subirDocumentoAnual);
+
+// Elimina un documento específico
 router.post('/documento/:docId/eliminar', ensureSession, checkEditPermission, ctrl.eliminarDocumento);
 
 module.exports = router;
-

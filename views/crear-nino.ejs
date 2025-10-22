@@ -6,198 +6,224 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link href="/css/formCrearnino.css" rel="stylesheet">
   <link href="/css/navbarStyles.css" rel="stylesheet">
+
+ <style>
+   body { background-color: #f8f9fa; }
+
+   /* ✅ CAMBIO APLICADO AQUÍ */
+   .main-container {
+     max-width: 1200px; /* Aumentado de 900px a 1200px */
+     margin: auto;
+   }
+
+   .accordion-button { font-weight: 600; }
+   .accordion-button:not(.collapsed) { background-color: #e7f1ff; color: #0d6efd; }
+   .form-section-title { font-weight: 700; color: #343a40; }
+   .image-preview {
+     width: 150px;
+     height: 150px;
+     border-radius: 50%; /* Lo hace un círculo perfecto */
+     border: 3px solid #dee2e6;
+
+     /*PROPIEDADES CLAVE PARA LA PROPORCIONALIDAD */
+     background-size: cover;     /* Escala la imagen para cubrir el div sin deformarla */
+     background-position: center; /* Centra la imagen dentro del círculo */
+     background-repeat: no-repeat;
+
+     /* Estilos para el ícono de marcador de posición */
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     background-color: #f8f9fa; /* Un fondo sutil para el círculo vacío */
+   }
+ </style>
 </head>
 <body>
   <%- include('navbar') %>
 
-  <div class="container-fluid mt-5 mb-5">
-    <div class="main-card">
-      <div class="page-header">
-        <h2>Expediente de Nuevo Niño</h2>
+  <div class="container-fluid mt-4 mb-5 main-container">
+      <div class="page-header mb-4">
+        <h2>Expediente de Primer Ingreso</h2>
       </div>
 
-      <div class="progress-bar-container">
-        <div class="step active" data-step="1">
-          <div class="step-icon">1</div>
-          <div class="step-label">Datos del Niño</div>
-        </div>
-        <div class="step" data-step="2">
-          <div class="step-icon">2</div>
-          <div class="step-label">Expediente Anual</div>
-        </div>
-        <div class="step" data-step="3">
-          <div class="step-icon">3</div>
-          <div class="step-label">Representante</div>
-        </div>
-        <div class="step" data-step="4">
-          <div class="step-icon">4</div>
-          <div class="step-label">Documentos</div>
-        </div>
-      </div>
-      <% if (success_msg && success_msg.length > 0) { %><div class="alert alert-success alert-dismissible fade show" role="alert"><%= success_msg %><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><% } %>
-      <% if (error_msg && error_msg.length > 0) { %><div class="alert alert-danger alert-dismissible fade show" role="alert"><% if (Array.isArray(error_msg)) { %><ul><% error_msg.forEach(function(error) { %><li><%= error %></li><% }); %></ul><% } else { %><%- error_msg %><% } %><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><% } %>
+      <div class="card">
+        <div class="card-body p-4">
+          <% if (success_msg) { %><div class="alert alert-success alert-dismissible fade show" role="alert"><%= success_msg %><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><% } %>
+          <% if (error_msg) { %><div class="alert alert-danger alert-dismissible fade show" role="alert"><%- error_msg %><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><% } %>
 
-      <form action="/crear-nino" method="POST" enctype="multipart/form-data" id="multiStepForm">
-        <% if (formData && formData.fromPostulationId) { %><input type="hidden" name="fromPostulationId" value="<%= formData.fromPostulationId %>"><% } %>
+          <form action="/crear-nino" method="POST" enctype="multipart/form-data" id="multiStepForm">
+            <% if (formData && formData.fromPostulationId) { %><input type="hidden" name="fromPostulationId" value="<%= formData.fromPostulationId %>"><% } %>
 
-        <div class="form-step active" data-step="1">
-          <h5 class="form-section-title">Datos del Niño</h5>
-          <div class="row g-3">
-            <div class="col-md-4"><label class="form-label">Código*</label><input type="text" name="codigo" class="form-control" required value="<%= formData.codigo || '' %>"></div>
-            <div class="col-md-4"><label class="form-label">Nombre Completo*</label><input type="text" name="nombre_completo" class="form-control" required value="<%= formData.nombre_completo || '' %>"></div>
-            <div class="col-md-4"><label class="form-label">Fecha de Nacimiento</label><input type="date" name="fecha_nacimiento" id="fechaNacimiento" class="form-control" value="<%= formData.fecha_nacimiento ? new Date(formData.fecha_nacimiento).toISOString().slice(0, 10) : '' %>"></div>
-            <div class="col-md-4"><label class="form-label">Edad</label><input type="number" step="1" name="edad" id="edad" class="form-control" value="<%= formData.edad || '' %>"></div>
-            <div class="col-md-4"><label class="form-label">Referido por</label><input type="text" name="referido_por" class="form-control" value="<%= formData.referido_por || '' %>"></div>
-            <div class="col-12"><label class="form-label">Diagnóstico</label><textarea name="diagnostico" class="form-control" rows="2"><%= formData.diagnostico || '' %></textarea></div>
-          </div>
-          <div class="form-navigation">
-            <button type="button" class="btn btn-primary next-btn">Siguiente</button>
-          </div>
-        </div>
-        <div class="form-step" data-step="2">
-          <h5 class="form-section-title">Datos del Primer Expediente Anual</h5>
-          <div class="row g-3">
-            <div class="col-md-4"><label class="form-label">Año Escolar*</label><select name="anio_escolar" class="form-select" required><option value="" disabled>Seleccione un año</option><% for (let i = new Date().getFullYear() + 1; i >= 2000; i--) { %><option value="<%= i %>" <%= (formData.anio_escolar == i || anioSugerido == i) ? 'selected' : '' %>><%= i %></option><% } %></select></div>
-            <div class="col-md-4"><label class="form-label">Grado</label><input type="text" name="grado" class="form-control" value="<%= formData.grado || '' %>"></div>
-            <div class="col-md-4"><label class="form-label">Programa Asignado</label><input type="text" name="programa_asignado" class="form-control" value="<%= formData.programa_asignado || '' %>"></div>
-            <div class="col-12"><label class="form-label">Observaciones del Año</label><textarea name="observaciones" class="form-control" rows="2"><%= formData.observaciones || '' %></textarea></div>
-          </div>
-          <div class="form-navigation">
-            <button type="button" class="btn btn-secondary prev-btn">Anterior</button>
-            <button type="button" class="btn btn-primary next-btn">Siguiente</button>
-          </div>
-        </div>
-        <div class="form-step" data-step="3">
-          <h5 class="form-section-title">Representante Legal</h5>
-          <div class="row g-3">
-            <div class="col-md-6"><label class="form-label">Nombre</label><input type="text" name="representante_nombre" class="form-control" value="<%= formData.representante_nombre || '' %>"></div>
-            <div class="col-md-6"><label class="form-label">DPI</label><input type="text" name="representante_dpi" class="form-control" value="<%= formData.representante_dpi || '' %>"></div>
-            <div class="col-md-4"><label class="form-label">Parentesco</label><input type="text" name="representante_parentesco" class="form-control" value="<%= formData.representante_parentesco || '' %>"></div>
-            <div class="col-md-4"><label class="form-label">Teléfono</label><input type="text" name="representante_telefono" class="form-control" value="<%= formData.representante_telefono || '' %>"></div>
-            <div class="col-md-4"><label class="form-label">Dirección</label><input type="text" name="representante_direccion" class="form-control" value="<%= formData.representante_direccion || '' %>"></div>
-          </div>
-          <div class="form-navigation">
-            <button type="button" class="btn btn-secondary prev-btn">Anterior</button>
-            <button type="button" class="btn btn-primary next-btn">Siguiente</button>
-          </div>
-        </div>
-        <div class="form-step" data-step="4">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="form-section-title mb-0">Documentos</h5>
-            <button type="button" class="btn btn-secondary" id="addDocumento"><i class="fas fa-plus me-2"></i>Agregar otro</button>
-          </div>
-          <div id="documentosContainer">
-            <div class="row g-3 documento-group">
-              <div class="col-md-5"><label class="form-label">Tipo</label><select name="documento_tipo[]" class="form-select"><option value="" selected disabled>Seleccione...</option><option value="Certificado de nacimiento">Certificado de nacimiento</option><option value="DPI de padres">DPI de padres</option><option value="Ficha de Postulación">Ficha de Postulación</option><option value="Informe Médico">Informe Médico</option><option value="Otros">Otros</option></select></div>
-              <div class="col-md-5"><label class="form-label">Archivo</label><input type="file" name="documento_archivo[]" class="form-control"></div>
-              <div class="col-md-2 d-flex align-items-end"><button type="button" class="btn btn-danger-soft w-100 remove-documento">Eliminar</button></div>
+            <div class="accordion" id="expedienteAccordion">
+
+              <!-- ===================== PASO 1: DATOS DEL NIÑO ===================== -->
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                    1. Datos Personales y de Identificación
+                  </button>
+                </h2>
+                <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#expedienteAccordion">
+                  <div class="accordion-body">
+                    <div class="row g-3">
+                      <div class="col-md-9"><div class="row g-3">
+                       <div class="col-md-4">
+                         <label class="form-label">Código FUNDAL</label>
+                         <input type="text" name="codigo" id="codigoInput" class="form-control" required value="<%= formData.codigo || '' %>">
+                       </div>
+                        <div class="col-md-8"><label class="form-label">Nombre Completo</label><input type="text" name="nombre_completo" class="form-control" required value="<%= formData.nombre_completo || '' %>"></div>
+                        <div class="col-md-4"><label class="form-label">Fecha de Nacimiento</label><input type="date" name="fecha_nacimiento" id="fechaNacimiento" class="form-control" required value="<%= formData.fecha_nacimiento ? new Date(formData.fecha_nacimiento).toISOString().slice(0, 10) : '' %>"></div>
+                        <div class="col-md-4"><label class="form-label">Edad</label><input type="number" name="edad" id="edad" class="form-control" readonly value="<%= formData.edad || '' %>"></div>
+                        <div class="col-md-4"><label class="form-label">Género</label><select name="genero" class="form-select" required><option value="" disabled selected>Seleccione...</option><option value="Masculino">Masculino</option><option value="Femenino">Femenino</option></select></div>
+                      </div></div>
+                     <div class="col-md-3 text-center d-flex flex-column align-items-center">
+                       <div id="imagePreview" class="image-preview mb-2">
+                         <i class="fas fa-user fa-3x text-muted"></i>
+                       </div>
+                       <label for="fotoInput" class="btn btn-sm btn-outline-secondary">Subir Foto</label>
+                       <input type="file" name="foto_perfil" id="fotoInput" class="d-none" accept="image/*">
+                     </div>
+                      <div class="col-md-4"><label class="form-label">ID Partida Nacimiento</label><input type="text" name="id_partida_nacimiento" class="form-control" required value="<%= formData.id_partida_nacimiento || '' %>"></div>
+                      <div class="col-md-4"><label class="form-label">Departamento</label><input type="text" name="departamento" class="form-control" required value="<%= formData.departamento || '' %>"></div>
+                      <div class="col-md-4"><label class="form-label">Municipio</label><input type="text" name="municipio" class="form-control" required value="<%= formData.municipio || '' %>"></div>
+                      <div class="col-md-4"><label class="form-label">Aldea/Comunidad</label><input type="text" name="aldea" class="form-control" required value="<%= formData.aldea || '' %>"></div>
+                      <div class="col-md-4"><label class="form-label">Referido por</label><input type="text" name="referido_por" class="form-control" value="<%= formData.referido_por || '' %>"></div>
+                      <div class="col-12"><label class="form-label">Diagnóstico</label><textarea name="diagnostico" class="form-control" rows="2"><%= formData.diagnostico || '' %></textarea></div>
+                      <div class="col-12"><label class="form-label">Discapacidad</label><textarea name="discapacidad" class="form-control" required rows="2"><%= formData.discapacidad || '' %></textarea></div>
+                    </div>
+                    <div class="text-end mt-3"><button type="button" class="btn btn-primary next-btn">Siguiente</button></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ===================== PASO 2: EXPEDIENTE ===================== -->
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed disabled" type="button" data-bs-target="#collapseTwo" disabled>
+                    2. Detalles del Expediente Anual
+                  </button>
+                </h2>
+                <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#expedienteAccordion">
+                  <div class="accordion-body">
+                    <div class="row g-3">
+                      <div class="col-md-4"><label class="form-label">Año Escolar</label><select name="anio_escolar" class="form-select" required><option value="" disabled selected>Seleccione...</option><% for (let i = new Date().getFullYear() + 2; i >= 2000; i--) { %><option value="<%= i %>" <%= (formData.anio_escolar == i || anioSugerido == i) ? 'selected' : '' %>><%= i %></option><% } %></select></div>
+                      <div class="col-md-4"><label class="form-label">Grado</label><input type="text" name="grado" class="form-control" value="<%= formData.grado || '' %>"></div>
+                      <div class="col-md-4"><label class="form-label">Programa Asignado</label><input type="text" name="programa_asignado" class="form-control" value="<%= formData.programa_asignado || '' %>"></div>
+                      <div class="col-12 mt-3">
+                        <label class="form-label fw-bold">Docentes Asignados</label>
+                        <div class="d-flex flex-wrap border rounded p-2">
+                          <div class="form-check me-4"><input class="form-check-input" type="checkbox" name="docentes" value="Carolina Lenus" id="docente-carolina"><label class="form-check-label" for="docente-carolina">Carolina Lenus</label></div>
+                          <div class="form-check me-4"><input class="form-check-input" type="checkbox" name="docentes" value="Damaris Gómez" id="docente-damaris"><label class="form-check-label" for="docente-damaris">Damaris Gómez</label></div>
+                          <div class="form-check me-4"><input class="form-check-input" type="checkbox" name="docentes" value="Atanea Salazar" id="docente-atanea"><label class="form-check-label" for="docente-atanea">Atanea Salazar</label></div>
+                          <div class="form-check me-4"><input class="form-check-input" type="checkbox" name="docentes" value="Darsha Salazar" id="docente-darsha"><label class="form-check-label" for="docente-darsha">Darsha Salazar</label></div>
+                          <div class="form-check me-4"><input class="form-check-input" type="checkbox" name="docentes" value="Daniela Martinez" id="docente-daniela"><label class="form-check-label" for="docente-daniela">Daniela Martinez</label></div>
+                        </div>
+                      </div>
+                      <div class="col-md-4"><label class="form-label">Fecha de Evaluación</label><input type="date" name="fecha_evaluacion" class="form-control" required></div>
+                      <div class="col-md-4"><label class="form-label">Fecha Ingreso Fundal</label><input type="date" name="fecha_ingreso_fundal" class="form-control" required></div>
+                      <div class="col-md-4"><label class="form-label">Fecha Ingreso MSPAS</label><input type="date" name="fecha_ingreso_mspas" class="form-control" required></div>
+                      <div class="col-md-4"><label class="form-label">Dificultad Socioeconómica*</label><select name="dificultad_socioeconomica" class="form-select" required><option value="" disabled selected>Seleccione...</option><option value="Alta">Alta</option><option value="Media">Media</option><option value="Baja">Baja</option></select></div>
+                      <div class="col-md-4"><label class="form-label">Etapa</label><select name="etapa" class="form-select" required><option value="" disabled selected>Seleccione...</option><option value="Primera Infancia">Primera Infancia</option><option value="Infancia">Infancia</option><option value="Adolescencia">Adolescencia</option></select></div>
+                      <div class="col-md-4">
+                        <label class="form-label">Código MINEDUC</label>
+                        <input type="text" name="codigo_mineduc" class="form-control" required value="<%= formData.codigo_mineduc || '' %>">
+                      </div>
+                      <div class="col-md-4"><label class="form-label">Sede</label><input type="text" name="sede" class="form-control" required value="Huehuetenango"></div>
+                      <div class="col-12"><label class="form-label">Observaciones del Año</label><textarea name="observaciones" class="form-control" rows="3"><%= formData.observaciones || '' %></textarea></div>
+                    </div>
+                    <div class="d-flex justify-content-between mt-3"><button type="button" class="btn btn-secondary prev-btn">Anterior</button><button type="button" class="btn btn-primary next-btn">Siguiente</button></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ===================== PASO 3: REPRESENTANTE ===================== -->
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
+                    3. Datos del Representante y Auxiliar
+                  </button>
+                </h2>
+                <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#expedienteAccordion">
+                  <div class="accordion-body">
+
+                    <h6 class="text-primary fw-bold">Representante Legal</h6>
+                    <hr class="mt-1 mb-3">
+                    <div class="row g-3">
+                      <div class="col-md-6"><label class="form-label">Nombre</label><input type="text" name="representante_nombre" class="form-control" value="<%= formData.representante_nombre || '' %>"></div>
+                      <div class="col-md-6"><label class="form-label">DPI</label><input type="text" name="representante_dpi" class="form-control" value="<%= formData.representante_dpi || '' %>"></div>
+                      <div class="col-md-4"><label class="form-label">Estado Civil</label><select name="estado_civil" class="form-select"><option value="Soltero/a" selected>Soltero/a</option><option value="Casado/a">Casado/a</option></select></div>
+                      <div class="col-md-4"><label class="form-label">Parentesco</label><input type="text" name="representante_parentesco" class="form-control" value="<%= formData.representante_parentesco || '' %>"></div>
+                      <div class="col-md-4"><label class="form-label">Teléfono</label><input type="text" name="representante_telefono" class="form-control" value="<%= formData.representante_telefono || '' %>"></div>
+                      <div class="col-12"><label class="form-label">Dirección</label><input type="text" name="representante_direccion" class="form-control" value="<%= formData.representante_direccion || '' %>"></div>
+                    </div>
+
+                    <h6 class="text-primary fw-bold mt-4">Auxiliar (Opcional)</h6>
+                    <hr class="mt-1 mb-3">
+                    <div class="row g-3">
+                      <div class="col-md-6">
+                        <label class="form-label">Nombre del Auxiliar</label>
+                        <input type="text" name="auxiliar_nombre" class="form-control" value="<%= formData.auxiliar_nombre || '' %>">
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label">Teléfono del Auxiliar</label>
+                        <input type="text" name="auxiliar_telefono" class="form-control" value="<%= formData.auxiliar_telefono || '' %>">
+                      </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                      <button type="button" class="btn btn-secondary prev-btn">Anterior</button>
+                      <button type="button" class="btn btn-primary next-btn">Siguiente</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ===================== PASO 4: DOCUMENTOS ===================== -->
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed disabled" type="button" data-bs-target="#collapseFour" disabled>
+                    4. Checklist de Documentos en Carpeta
+                  </button>
+                </h2>
+                <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#expedienteAccordion">
+                  <div class="accordion-body">
+                    <p class="text-muted">Marque las casillas de los documentos que han sido entregados y archivados físicamente.</p>
+                    <%
+                      const documentos = [
+                        { grupo: 'Documentos del Estudiante', items: ['Partida de nacimiento', 'Evaluaciones médicas recientes', 'Referencia del Centro de salud', '2 fotos tamaño cédula a color'] },
+                        { grupo: 'Documentos del Encargado', items: ['Copia de DPI vigente', 'Antecedentes penales del año', 'Antecedente policíacos del año', 'RENAS del año en curso'] },
+                        { grupo: 'Documentos de Auxiliar (si aplica)', items: ['Carta de autorización'] }
+                      ];
+                      let docIndex = 0;
+                    %>
+                    <% documentos.forEach(grupo => { %>
+                      <h6 class="mt-4"><%= grupo.grupo %></h6><hr class="mt-1">
+                      <div class="row">
+                        <% grupo.items.forEach(item => { %>
+                          <div class="col-md-6"><div class="form-check">
+                            <input type="hidden" name="documentos[<%= docIndex %>][tipo]" value="<%= item %>">
+                            <input class="form-check-input" type="checkbox" name="documentos[<%= docIndex %>][confirmado]" value="true" id="doc-<%= docIndex %>">
+                            <label class="form-check-label" for="doc-<%= docIndex %>"><%= item %></label>
+                          </div></div>
+                          <% docIndex++; %>
+                        <% }); %>
+                      </div>
+                    <% }); %>
+                    <div class="d-flex justify-content-between mt-4"><button type="button" class="btn btn-secondary prev-btn">Anterior</button><button type="submit" class="btn btn-primary btn-lg">Guardar Expediente</button></div>
+                  </div>
+                </div>
+              </div>
+
             </div>
-          </div>
-          <div class="form-navigation">
-            <button type="button" class="btn btn-secondary prev-btn">Anterior</button>
-            <button type="submit" class="btn btn-primary btn-lg">Guardar Expediente</button>
-          </div>
+          </form>
         </div>
-        </form>
+      </div>
     </div>
-  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      // Lógica del formulario por pasos
-      const steps = document.querySelectorAll('.step');
-      const formSteps = document.querySelectorAll('.form-step');
-      const nextBtns = document.querySelectorAll('.next-btn');
-      const prevBtns = document.querySelectorAll('.prev-btn');
-      const form = document.getElementById('multiStepForm');
-      let currentStep = 1;
-
-      function updateSteps() {
-        steps.forEach(step => {
-          const stepNum = parseInt(step.dataset.step);
-          if (stepNum === currentStep) {
-            step.classList.add('active');
-          } else {
-            step.classList.remove('active');
-          }
-        });
-
-        formSteps.forEach(formStep => {
-          formStep.classList.remove('active');
-        });
-
-        form.querySelector(`.form-step[data-step="${currentStep}"]`).classList.add('active');
-      }
-
-      function validateStep(step) {
-          const inputs = formSteps[step - 1].querySelectorAll('input[required], select[required]');
-          let isValid = true;
-          inputs.forEach(input => {
-              if (!input.value.trim()) {
-                  isValid = false;
-                  // Opcional: añadir clase de error para feedback visual
-                  input.classList.add('is-invalid');
-              } else {
-                  input.classList.remove('is-invalid');
-              }
-          });
-          if (!isValid) alert('Por favor, completa todos los campos requeridos (*).');
-          return isValid;
-      }
-
-
-      nextBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          if (validateStep(currentStep) && currentStep < steps.length) {
-            currentStep++;
-            updateSteps();
-          }
-        });
-      });
-
-      prevBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          if (currentStep > 1) {
-            currentStep--;
-            updateSteps();
-          }
-        });
-      });
-
-      // Lógica de Documentos
-      const documentosContainer = document.getElementById('documentosContainer');
-      document.getElementById('addDocumento').addEventListener('click', () => {
-        const newGroup = documentosContainer.querySelector('.documento-group').cloneNode(true);
-        newGroup.querySelectorAll('input, select').forEach(el => { el.value = ''; });
-        documentosContainer.appendChild(newGroup);
-      });
-      documentosContainer.addEventListener('click', e => {
-        if (e.target.classList.contains('remove-documento')) {
-          if (documentosContainer.querySelectorAll('.documento-group').length > 1) {
-            e.target.closest('.documento-group').remove();
-          }
-        }
-      });
-
-      // Lógica de Edad
-      document.getElementById('fechaNacimiento').addEventListener('change', function(e) {
-        const edadInput = document.getElementById('edad');
-        if (!e.target.value) { edadInput.value = ''; return; }
-        const birthDate = new Date(e.target.value);
-        let years = new Date().getFullYear() - birthDate.getFullYear();
-        const m = new Date().getMonth() - birthDate.getMonth();
-        if (m < 0 || (m === 0 && new Date().getDate() < birthDate.getDate())) { years--; }
-        edadInput.value = years;
-      });
-
-      // Ocultar alertas
-      setTimeout(() => { document.querySelectorAll('.alert').forEach(a => new bootstrap.Alert(a).close()); }, 4000);
-    });
-  </script>
+  <script src="./js/form-crear-nino.js"></script>
   </body>
 </html>

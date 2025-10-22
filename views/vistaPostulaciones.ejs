@@ -23,6 +23,9 @@
               <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCrear">
                 <i class="fas fa-plus me-1"></i> Nueva Postulación
               </button>
+                <a href="/postulaciones/archivadas" class="btn btn-sm btn-outline-secondary" title="Ver Archivados">
+                  <i class="fas fa-box-archive"></i> Ver Archivados
+                </a>
               <a href="/postulaciones/exportar-excel" class="btn btn-secondary">
                 <i class="fas fa-file-excel me-1"></i> Exportar
               </a>
@@ -33,40 +36,107 @@
           </div>
         </div>
 
-        <% if (success_msg) { %><div class="alert alert-success alert-dismissible fade show" role="alert"><%= success_msg %><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><% } %>
-        <% if (error_msg) { %><div class="alert alert-danger alert-dismissible fade show" role="alert"><%= error_msg %><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><% } %>
+        <% if (success_msg && success_msg.length > 0) { %>
+          <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <%= success_msg %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        <% } %>
+        <% if (error_msg && error_msg.length > 0) { %>
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <%= error_msg %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        <% } %>
         <% if (special_success_msg) { %><div class="alert alert-success alert-dismissible fade show" role="alert"><div class="d-flex justify-content-between align-items-center"><span><%- special_success_msg.text %></span><a href="<%= special_success_msg.action.url %>" class="btn btn-sm btn-dark ms-3"><i class="fas fa-file-alt me-1"></i> <%= special_success_msg.action.label %></a></div><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><% } %>
 
         <div class="table-wrapper">
           <table class="table align-middle">
             <thead>
-              <tr>
-                <th>#</th>
-                <th>Nombre niño</th>
-                <th>Edad</th>
-                <th>Madre/Padre</th>
-                <th>Teléfono</th>
-                <th>Estado</th>
-                <th class="text-end">Acciones</th>
+              <tr class="text-nowrap">
+                      <th style="width: 5%;">#</th>
+                      <th style="width: 25%;">Nombre niño</th>
+                      <th style="width: 15%;">Fecha Visita</th>
+                      <th style="width: 20%;">Contacto Principal</th>
+                      <th style="width: 20%;">Programa y Grado</th>
+                      <th style="width: 10%;">Responsable</th>
+                      <th style="width: 5%;">Estado</th>
+                      <th class="text-end" style="width: 5%;">Acciones</th>
               </tr>
             </thead>
             <tbody>
               <% postulaciones.forEach(p => { %>
                 <tr>
                   <td><small class="text-muted"><%= p.id %></small></td>
-                  <td><strong><%= p["nombre_niño"] %></strong></td>
-                  <td><%= p.edad || '' %></td>
-                  <td><%= p.nombre_madre || p.nombre_padre || '' %></td>
-                  <td><%= p.telefono || '' %></td>
-                  <td>
-                    <span class="badge <%= p.estado === 'APROBADA' ? 'bg-success' : (p.estado === 'RECHAZADA' ? 'bg-danger':'bg-secondary') %>">
-                      <%= p.estado %>
-                    </span>
-                  </td>
+                            <td>
+                              <strong><%= p["nombre_niño"] %></strong>
+                              <% if (p.dificultad_auditiva) { %>
+                                <i class="fas fa-ear-listen text-muted ms-2" title="Dificultad Auditiva"></i>
+                              <% } %>
+                              <% if (p.dificultad_visual) { %>
+                                <i class="fas fa-eye-low-vision text-muted ms-1" title="Dificultad Visual"></i>
+                              <% } %>
+                            </td>
+                            <td>
+                              <% if (p.fecha_visita) { %>
+                                <%= new Date(p.fecha_visita).toLocaleDateString('es-GT', {day: '2-digit', month: '2-digit', year: 'numeric'}) %>
+                              <% } else { %>
+                                --
+                              <% } %>
+                            </td>
+                            <td>
+                              <%= p.nombre_madre || p.nombre_padre || 'No especificado' %>
+                              <br>
+                              <small class="text-muted"><%= p.telefono || p.telefono_padre || '--' %></small>
+                            </td>
+
+                            <td>
+                              <%= p.programa_asignado || '--' %>
+                              <br>
+                              <small class="text-muted"><%= p.grado || '--' %></small>
+                            </td>
+
+                            <td><%= p.atendido_por || '--' %></td>
+
+                            <td>
+                              <span class="badge <%= p.estado === 'FINALIZADO' ? 'bg-success' : (p.estado === 'NO INICIADO' ? 'bg-danger':'bg-secondary') %>">
+                                <%= p.estado %>
+                              </span>
+                            </td>
                   <td class="text-end">
                     <div class="action-buttons">
                       <% if (user && (user.rol === 'Secretaria' || user.rol === 'Directivo')) { %>
-                        <button class="btn btn-icon" title="Editar" data-bs-toggle="modal" data-bs-target="#modalEditar" data-id="<%= p.id %>" data-visita="<%= p.fecha_visita ? p.fecha_visita.toISOString().slice(0,10) : '' %>" data-medcom="<%= p.medio_comunicacion || '' %>" data-nombre="<%= p['nombre_niño'] %>" data-nac="<%= p.fecha_nacimiento ? p.fecha_nacimiento.toISOString().slice(0,10) : '' %>" data-edad="<%= p.edad || '' %>" data-dir="<%= (p.direccion || '').replace(/"/g,'&quot;') %>" data-madre="<%= p.nombre_madre || '' %>" data-padre="<%= p.nombre_padre || '' %>" data-tel="<%= p.telefono || '' %>" data-telpadre="<%= p.telefono_padre || '' %>" data-aud="<%= p.dificultad_auditiva %>" data-vis="<%= p.dificultad_visual %>" data-apoyo="<%= (p.tipo_apoyo || '').replace(/"/g,'&quot;') %>" data-ref="<%= p.referido_por || '' %>" data-atendido="<%= p.atendido_por || '' %>" data-prog="<%= p.programa_asignado || '' %>" data-notseg="<%= (p.notas_seguimiento || '').replace(/"/g,'&quot;') %>" data-conc="<%= (p.conclusiones || '').replace(/"/g,'&quot;') %>" data-grado="<%= p.grado || '' %>" data-obs="<%= p.observaciones || '' %>" data-estado="<%= p.estado || 'PENDIENTE' %>" data-diagn="<%= p.diagnostico || '' %>">
+                        <button
+                          class="btn btn-icon"
+                          title="Editar"
+                          data-bs-toggle="modal"
+                          data-bs-target="#modalEditar"
+                          data-id="<%= p.id %>"
+                          data-visita="<%= p.fecha_visita ? p.fecha_visita.toISOString().slice(0,10) : '' %>"
+                          data-medcom="<%= (p.medio_comunicacion || '').trim() %>"
+                          data-nombre="<%= p['nombre_niño'] %>"
+                          data-nac="<%= p.fecha_nacimiento ? p.fecha_nacimiento.toISOString().slice(0,10) : '' %>"
+                          data-edad="<%= p.edad || '' %>"
+                          data-dir="<%= (p.direccion || '').trim() %>"
+                          data-madre="<%= (p.nombre_madre || '').trim() %>"
+                          data-padre="<%= (p.nombre_padre || '').trim() %>"
+
+                          data-tel="<%= (p.telefono || '').trim() %>"
+                          data-telpadre="<%= (p.telefono_padre || '').trim() %>"
+                          data-aud="<%= p.dificultad_auditiva %>"
+                          data-vis="<%= p.dificultad_visual %>"
+
+                          data-apoyo="<%= (p.tipo_apoyo || '').trim() %>"
+                          data-atendido="<%= (p.atendido_por || '').trim() %>"
+
+                          data-ref="<%= (p.referido_por || '').trim() %>"
+                          data-prog="<%= (p.programa_asignado || '').trim() %>"
+                          data-notseg="<%= (p.notas_seguimiento || '').trim() %>"
+                          data-conc="<%= (p.conclusiones || '').trim() %>"
+                          data-grado="<%= (p.grado || '').trim() %>"
+                          data-obs="<%= (p.observaciones || '').trim() %>"
+                          data-estado="<%= p.estado || 'EN PROCESO' %>"
+                          data-diagn="<%= (p.diagnostico || '').trim() %>">
                           <i class="fas fa-pencil-alt"></i>
                         </button>
                       <% } %>
@@ -76,6 +146,13 @@
                         </button>
                         <form action="/postulaciones/eliminar/<%= p.id %>" method="POST" class="d-inline-block" onsubmit="return confirm('¿Eliminar esta postulación?')">
                           <button class="btn btn-icon" title="Eliminar"><i class="fas fa-trash-alt"></i></button>
+                        </form>
+                      <% } %>
+                      <% if (p.estado === 'FINALIZADO' && !p.nino_id) { %>
+                        <form action="/postulaciones/archivar/<%= p.id %>" method="POST" class="d-inline-block" onsubmit="return confirm('¿Está seguro de que desea archivar esta postulación?')">
+                          <button class="btn btn-icon" title="Archivar Postulación">
+                            <i class="fas fa-box-archive text-secondary"></i>
+                          </button>
                         </form>
                       <% } %>
                     </div>
@@ -101,9 +178,9 @@
           <div class="mb-3">
             <label for="edit-estado-select" class="form-label">Estado</label>
             <select class="form-select" name="estado" id="edit-estado-select" required>
-              <option value="PENDIENTE">PENDIENTE</option>
-              <option value="APROBADA">APROBADA</option>
-              <option value="RECHAZADA">RECHAZADA</option>
+              <option value="EN PROCESO">EN PROCESO</option>
+              <option value="FINALIZADO">FINALIZADO</option>
+              <option value="NO INICIADO">NO INICIADO</option>
             </select>
           </div>
         </div>
@@ -135,9 +212,8 @@
             <div class="col-md-4">
               <label class="form-label">Estado</label>
               <select name="estado" class="form-select">
-                <option value="PENDIENTE">PENDIENTE</option>
-                <option value="APROBADA">APROBADA</option>
-                <option value="RECHAZADA">RECHAZADA</option>
+                <option value="EN PROCESO">EN PROCESO</option>
+                <option value="NO INICIADO">NO INICIADO</option>
               </select>
             </div>
 
@@ -147,11 +223,11 @@
             </div>
             <div class="col-md-3">
               <label class="form-label">Fecha nacimiento</label>
-              <input type="date" name="fecha_nacimiento" class="form-control">
+              <input type="date" name="fecha_nacimiento" id="fechaNacimientoInput" class="form-control">
             </div>
             <div class="col-md-3">
               <label class="form-label">Edad</label>
-              <input type="number" step="0.1" name="edad" class="form-control">
+              <input type="number" step="0.1" name="edad" id="edadInput" class="form-control">
             </div>
 
             <div class="col-md-12">
@@ -185,23 +261,37 @@
               <label class="form-check-label" for="vis1">Dificultad visual</label>
             </div>
             <div class="col-md-6">
-              <label class="form-label">Tipo de apoyo</label>
-              <input type="text" name="tipo_apoyo" class="form-control">
+              <label for="tipo-apoyo-select" class="form-label">Tipo de apoyo</label>
+              <select name="tipo_apoyo" id="tipo-apoyo-select" class="form-select" required>
+                <option selected disabled value="">Selecciona...</option>
+                <option value="Centro Educativo">Centro Educativo</option>
+                <option value="Centro de Recursos">Centro de Recursos</option>
+                <option value="Inclusión Laboral">Inclusión Laboral</option>
+                <option value="Inclusión Educativa">Inclusión Educativa</option>
+              </select>
             </div>
-
             <div class="col-md-4">
               <label class="form-label">Referido por</label>
               <input type="text" name="referido_por" class="form-control">
             </div>
             <div class="col-md-4">
-              <label class="form-label">Atendido por</label>
-              <input type="text" name="atendido_por" class="form-control">
+              <label for="e-atendido" class="form-label">Atendido por</label>
+              <select name="atendido_por" id="e-atendido" class="form-select" required>
+                <option selected disabled value="">Selecciona...</option>
+                <option value="Kenny Castillo">Kenny Castillo</option>
+                <option value="Sandra Cifuentes">Sandra Cifuentes</option>
+                <option value="Marta Sirin">Marta Sirin</option>
+              </select>
             </div>
-            <div class="col-md-4">
-              <label class="form-label">Programa asignado</label>
-              <input type="text" name="programa_asignado" class="form-control">
-            </div>
-
+             <div class="col-md-4">
+                  <label for="e-prog" class="form-label">Programa asignado</label>
+                  <select name="programa_asignado" id="e-prog" class="form-select">
+                    <option selected disabled value="">Selecciona...</option>
+                    <option value="Centro Educativo">Centro Educativo</option>
+                    <option value="Programa Híbrido">Programa Híbrido</option>
+                    <option value="Centro de Recursos">Centro de Recursos</option>
+                  </select>
+              </div>
             <div class="col-md-6">
               <label class="form-label">Notas seguimiento</label>
               <textarea name="notas_seguimiento" class="form-control" rows="2"></textarea>
@@ -212,8 +302,15 @@
             </div>
 
             <div class="col-md-6">
-              <label class="form-label">Grado</label>
-              <input type="text" name="grado" class="form-control">
+              <label for="e-grado" class="form-label">Grado</label>
+              <select name="grado" id="e-grado" class="form-select">
+                <option selected disabled value="">Selecciona...</option>
+                <option value="Inicial">Inicial</option>
+                <option value="Preescolar">Preescolar</option>
+                <option value="Multigrado">Multigrado</option>
+                <option value="Técnico Vocacional">Técnico Vocacional</option>
+                <option value="Centro de Recursos">Centro de Recursos</option>
+              </select>
             </div>
             <div class="col-md-6">
               <label class="form-label">Observaciones</label>
@@ -233,190 +330,313 @@
     </div>
   </div>
 
-  <!-- Modal EDITAR -->
-  <div class="modal fade" id="modalEditar" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <form class="modal-content" method="POST" id="formEditar">
-        <div class="modal-header bg-warning">
-          <h5 class="modal-title">Editar Postulación</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <input type="hidden" id="edit-id">
 
-          <div class="row g-3">
-            <div class="col-md-4">
-              <label class="form-label">Fecha visita</label>
-              <input type="date" name="fecha_visita" id="e-visita" class="form-control">
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">Medio comunicación</label>
-              <input type="text" name="medio_comunicacion" id="e-medcom" class="form-control">
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">Estado</label>
-              <select name="estado" id="e-estado" class="form-select">
-                <option value="PENDIENTE">PENDIENTE</option>
-                <option value="APROBADA">APROBADA</option>
-                <option value="RECHAZADA">RECHAZADA</option>
-              </select>
-            </div>
+<div class="modal fade" id="modalEditar" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <form class="modal-content" method="POST" id="formEditar" accept-charset="UTF-8">
+      <div class="modal-header bg-warning">
+        <h5 class="modal-title">Editar y Visualizar Postulación</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
 
-            <div class="col-md-6">
-              <label class="form-label">Nombre niño*</label>
-              <input type="text" name="nombre_niño" id="e-nombre" class="form-control" required>
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">Fecha nacimiento</label>
-              <input type="date" name="fecha_nacimiento" id="e-nac" class="form-control">
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">Edad</label>
-              <input type="number" step="0.1" name="edad" id="e-edad" class="form-control">
-            </div>
+      <div class="modal-body">
+        <input type="hidden" id="edit-id" name="id">
 
-            <div class="col-md-12">
-              <label class="form-label">Dirección</label>
-              <input type="text" name="direccion" id="e-dir" class="form-control">
-            </div>
+        <div class="row g-4">
 
-            <div class="col-md-4">
-              <label class="form-label">Nombre madre</label>
-              <input type="text" name="nombre_madre" id="e-madre" class="form-control">
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">Nombre padre</label>
-              <input type="text" name="nombre_padre" id="e-padre" class="form-control">
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">Tel. madre</label>
-              <input type="text" name="telefono" id="e-tel" class="form-control">
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">Tel. padre</label>
-              <input type="text" name="telefono_padre" id="e-telpadre" class="form-control">
-            </div>
+          <div class="col-12">
+            <h6 class="text-primary fw-bold">Información General</h6>
+            <hr class="mt-1 mb-3">
+          </div>
+          <div class="col-md-4">
+            <label for="e-visita" class="form-label">Fecha visita</label>
+            <input type="date" name="fecha_visita" id="e-visita" class="form-control">
+          </div>
+          <div class="col-md-4">
+            <label for="e-medcom" class="form-label">Medio comunicación</label>
+            <input type="text" name="medio_comunicacion" id="e-medcom" class="form-control">
+          </div>
+          <div class="col-md-4">
+            <label for="e-estado" class="form-label">Estado</label>
+            <select name="estado" id="e-estado" class="form-select">
+              <option value="EN PROCESO">EN PROCESO</option>
+              <option value="FINALIZADO">FINALIZADO</option>
+              <option value="NO INICIADO">NO INICIADO</option>
+            </select>
+          </div>
 
-            <div class="col-md-3 form-check mt-3">
+          <div class="col-12 mt-4">
+            <h6 class="text-primary fw-bold">Datos del Niño</h6>
+            <hr class="mt-1 mb-3">
+          </div>
+          <div class="col-md-6">
+            <label for="e-nombre" class="form-label">Nombre niño*</label>
+            <input type="text" name="nombre_niño" id="e-nombre" class="form-control" required>
+          </div>
+          <div class="col-md-3">
+            <label for="e-nac" class="form-label">Fecha nacimiento</label>
+            <input type="date" name="fecha_nacimiento" id="e-nac" class="form-control">
+          </div>
+          <div class="col-md-3">
+            <label for="e-edad" class="form-label">Edad</label>
+            <input type="number" step="0.1" name="edad" id="e-edad" class="form-control">
+          </div>
+          <div class="col-md-12">
+            <label for="e-dir" class="form-label">Dirección</label>
+            <input type="text" name="direccion" id="e-dir" class="form-control">
+          </div>
+
+          <div class="col-12 mt-4">
+            <h6 class="text-primary fw-bold">Información Familiar</h6>
+            <hr class="mt-1 mb-3">
+          </div>
+          <div class="col-md-4">
+            <label for="e-madre" class="form-label">Nombre madre</label>
+            <input type="text" name="nombre_madre" id="e-madre" class="form-control">
+          </div>
+          <div class="col-md-4">
+            <label for="e-padre" class="form-label">Nombre padre</label>
+            <input type="text" name="nombre_padre" id="e-padre" class="form-control">
+          </div>
+          <div class="col-md-2">
+            <label for="e-tel" class="form-label">Tel. madre</label>
+            <input type="text" name="telefono" id="e-tel" class="form-control">
+          </div>
+          <div class="col-md-2">
+            <label for="e-telpadre" class="form-label">Tel. padre</label>
+            <input type="text" name="telefono_padre" id="e-telpadre" class="form-control">
+          </div>
+
+          <div class="col-12 mt-4">
+            <h6 class="text-primary fw-bold">Evaluación y Seguimiento</h6>
+            <hr class="mt-1 mb-3">
+          </div>
+          <div class="col-md-3 align-self-center">
+            <div class="form-check">
               <input type="checkbox" class="form-check-input" id="e-aud" name="dificultad_auditiva" value="true">
               <label class="form-check-label" for="e-aud">Dificultad auditiva</label>
             </div>
-            <div class="col-md-3 form-check mt-3">
+            <div class="form-check">
               <input type="checkbox" class="form-check-input" id="e-vis" name="dificultad_visual" value="true">
               <label class="form-check-label" for="e-vis">Dificultad visual</label>
             </div>
-            <div class="col-md-6">
-              <label class="form-label">Tipo de apoyo</label>
-              <input type="text" name="tipo_apoyo" id="e-apoyo" class="form-control">
-            </div>
-
-            <div class="col-md-4">
-              <label class="form-label">Referido por</label>
-              <input type="text" name="referido_por" id="e-ref" class="form-control">
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">Atendido por</label>
-              <input type="text" name="atendido_por" id="e-atendido" class="form-control">
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">Programa asignado</label>
-              <input type="text" name="programa_asignado" id="e-prog" class="form-control">
-            </div>
-
-            <div class="col-md-6">
-              <label class="form-label">Notas seguimiento</label>
-              <textarea name="notas_seguimiento" id="e-notseg" class="form-control" rows="2"></textarea>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Conclusiones</label>
-              <textarea name="conclusiones" id="e-conc" class="form-control" rows="2"></textarea>
-            </div>
-
-            <div class="col-md-6">
-              <label class="form-label">Grado</label>
-              <input type="text" name="grado" id="e-grado" class="form-control">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Observaciones</label>
-              <textarea name="observaciones" id="e-obs" class="form-control" rows="2"></textarea>
-            </div>
-
-            <div class="col-12">
-              <label class="form-label">Diagnóstico</label>
-              <textarea name="diagnostico" id="e-diagn" class="form-control" rows="2"></textarea>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Referido por</label>
+            <input type="text" name="referido_por" id="e-ref" class="form-control">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Tipo de apoyo</label>
+            <input type="hidden" name="tipo_apoyo" id="e-apoyo-hidden">
+            <div class="input-group">
+              <input type="text" class="form-control" id="apoyo-actual-text" disabled title="Valor actual">
+              <select id="apoyo-change-select" class="form-select" title="Cambiar valor">
+                <option value="">Cambiar...</option>
+                <option value="Centro Educativo">Centro Educativo</option>
+                <option value="Centro de Recursos">Centro de Recursos</option>
+                <option value="Inclusión Laboral">Inclusión Laboral</option>
+                <option value="Inclusión Educativa">Inclusión Educativa</option>
+              </select>
             </div>
           </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-warning">Guardar Cambios</button>
-        </div>
-      </form>
-    </div>
-  </div>
+          <div class="col-md-4">
+            <label class="form-label">Atendido por</label>
+            <input type="hidden" name="atendido_por" id="e-atendido-hidden">
+            <div class="input-group">
+              <input type="text" class="form-control" id="atendido-actual-text" disabled title="Valor actual">
+              <select id="atendido-change-select" class="form-select" title="Cambiar valor">
+                <option value="">Cambiar...</option>
+                <option value="Kenny Castillo">Kenny Castillo</option>
+                <option value="Sandra Cifuentes">Sandra Cifuentes</option>
+                <option value="Marta Sirin">Marta Sirin</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Programa asignado</label>
+            <input type="hidden" name="programa_asignado" id="e-prog-hidden">
+            <div class="input-group">
+              <input type="text" class="form-control" id="prog-actual-text" disabled title="Valor actual">
+              <select id="prog-change-select" class="form-select" title="Cambiar valor">
+                <option value="">Cambiar...</option>
+                <option value="Centro Educativo">Centro Educativo</option>
+                <option value="Programa Híbrido">Programa Híbrido</option>
+                <option value="Centro de Recursos">Centro de Recursos</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Grado</label>
+            <input type="hidden" name="grado" id="e-grado-hidden">
+            <div class="input-group">
+              <input type="text" class="form-control" id="grado-actual-text" disabled title="Valor actual">
+              <select id="grado-change-select" class="form-select" title="Cambiar valor">
+                <option value="">Cambiar...</option>
+                <option value="Inicial">Inicial</option>
+                <option value="Preescolar">Preescolar</option>
+                <option value="Multigrado">Multigrado</option>
+                <option value="Técnico Vocacional">Técnico Vocacional</option>
+                <option value="Centro de Recursos">Centro de Recursos</option>
+              </select>
+            </div>
+          </div>
 
+          <div class="col-12 mt-4">
+            <h6 class="text-primary fw-bold">Notas y Diagnóstico</h6>
+            <hr class="mt-1 mb-3">
+          </div>
+          <div class="col-md-6">
+            <label for="e-notseg" class="form-label">Notas seguimiento</label>
+            <textarea name="notas_seguimiento" id="e-notseg" class="form-control" rows="3"></textarea>
+          </div>
+          <div class="col-md-6">
+            <label for="e-conc" class="form-label">Conclusiones</label>
+            <textarea name="conclusiones" id="e-conc" class="form-control" rows="3"></textarea>
+          </div>
+          <div class="col-md-6">
+            <label for="e-obs" class="form-label">Observaciones</label>
+            <textarea name="observaciones" id="e-obs" class="form-control" rows="3"></textarea>
+          </div>
+          <div class="col-md-6">
+            <label for="e-diagn" class="form-label">Diagnóstico</label>
+            <textarea name="diagnostico" id="e-diagn" class="form-control" rows="3"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" id="btnGuardarCambios" class="btn btn-warning">Guardar Cambios</button>
+      </div>
+    </form>
+  </div>
+</div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+   <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+<script>
+      // 1. Selecciona los dos campos por su ID
+      const fechaNacimientoInput = document.getElementById('fechaNacimientoInput');
+      const edadInput = document.getElementById('edadInput');
+
+      // 2. Escucha cualquier cambio en la fecha de nacimiento
+      fechaNacimientoInput.addEventListener('change', () => {
+        const fechaNac = fechaNacimientoInput.value;
+
+        // Si hay una fecha seleccionada, calcula la edad
+        if (fechaNac) {
+          const hoy = new Date();
+          const cumpleanos = new Date(fechaNac);
+          let edad = hoy.getFullYear() - cumpleanos.getFullYear();
+          const m = hoy.getMonth() - cumpleanos.getMonth();
+
+          // Ajusta la edad si el cumpleaños de este año aún no ha pasado
+          if (m < 0 || (m === 0 && hoy.getDate() < cumpleanos.getDate())) {
+            edad--;
+          }
+
+          // Pone el resultado en el campo de edad
+          edadInput.value = edad;
+        } else {
+          // Si se borra la fecha, se borra la edad
+          edadInput.value = '';
+        }
+      });
+    </script>
 
   <script>
-    // Cargar datos en modal Editar
-    const modalEditar = document.getElementById('modalEditar');
+
+  // Script Final para el Modal de Editar (método tradicional)
+  const modalEditar = document.getElementById('modalEditar');
+
+  if (modalEditar) {
+    const formEditar = document.getElementById('formEditar');
+
+    // Lógica para llenar el formulario cuando el modal se abre
     modalEditar.addEventListener('show.bs.modal', (e) => {
-      const b = e.relatedTarget;
-      const id = b.getAttribute('data-id');
+      const triggerButton = e.relatedTarget;
+      const id = triggerButton.getAttribute('data-id');
 
-      const set = (id, val='') => document.getElementById(id).value = val || '';
+      // Asigna la ruta de envío correcta al formulario
+      formEditar.action = `/postulaciones/editar/${id}`;
+
+      // Función para llenar campos de texto y selects simples
+      const setInput = (elementId, attribute) => {
+        const element = document.getElementById(elementId);
+        if (element) {
+          element.value = triggerButton.getAttribute(attribute) || '';
+        }
+      };
+
+      // Llenando todos los campos
       document.getElementById('edit-id').value = id;
-      set('e-visita', b.getAttribute('data-visita'));
-      set('e-medcom', b.getAttribute('data-medcom'));
-      set('e-nombre', b.getAttribute('data-nombre'));
-      set('e-nac', b.getAttribute('data-nac'));
-      set('e-edad', b.getAttribute('data-edad'));
-      set('e-dir', b.getAttribute('data-dir'));
-      set('e-madre', b.getAttribute('data-madre'));
-      set('e-padre', b.getAttribute('data-padre'));
-      set('e-tel', b.getAttribute('data-tel'));
-      set('e-telpadre', b.getAttribute('data-telpadre'));
-      document.getElementById('e-aud').checked = (b.getAttribute('data-aud') === 'true');
-      document.getElementById('e-vis').checked = (b.getAttribute('data-vis') === 'true');
-      set('e-apoyo', b.getAttribute('data-apoyo'));
-      set('e-ref', b.getAttribute('data-ref'));
-      set('e-atendido', b.getAttribute('data-atendido'));
-      set('e-prog', b.getAttribute('data-prog'));
-      set('e-notseg', b.getAttribute('data-notseg'));
-      set('e-conc', b.getAttribute('data-conc'));
-      set('e-grado', b.getAttribute('data-grado'));
-      set('e-obs', b.getAttribute('data-obs'));
-      set('e-diagn', b.getAttribute('data-diagn'));
-      document.getElementById('e-estado').value = b.getAttribute('data-estado') || 'PENDIENTE';
+      setInput('e-visita', 'data-visita');
+      setInput('e-medcom', 'data-medcom');
+      setInput('e-estado', 'data-estado');
+      setInput('e-nombre', 'data-nombre');
+      setInput('e-nac', 'data-nac');
+      setInput('e-edad', 'data-edad');
+      setInput('e-dir', 'data-dir');
+      setInput('e-madre', 'data-madre');
+      setInput('e-padre', 'data-padre');
+      setInput('e-tel', 'data-tel');
+      setInput('e-telpadre', 'data-telpadre');
+      setInput('e-ref', 'data-ref');
+      setInput('e-notseg', 'data-notseg');
+      setInput('e-conc', 'data-conc');
+      setInput('e-obs', 'data-obs');
+      setInput('e-diagn', 'data-diagn');
 
-      // fijar action
-      document.getElementById('formEditar').action = `/postulaciones/editar/${id}`;
+      // Llenando checkboxes
+      document.getElementById('e-aud').checked = (triggerButton.getAttribute('data-aud') === 'true');
+      document.getElementById('e-vis').checked = (triggerButton.getAttribute('data-vis') === 'true');
+
+      // Llenando los campos con opciones (valor actual + selector)
+      document.getElementById('apoyo-actual-text').value = triggerButton.getAttribute('data-apoyo') || 'No asignado';
+      document.getElementById('e-apoyo-hidden').value = triggerButton.getAttribute('data-apoyo') || 'No asignado';
+
+      document.getElementById('atendido-actual-text').value = triggerButton.getAttribute('data-atendido') || 'No asignado';
+      document.getElementById('e-atendido-hidden').value = triggerButton.getAttribute('data-atendido') || 'No asignado';
+
+      document.getElementById('prog-actual-text').value = triggerButton.getAttribute('data-prog') || 'No asignado';
+      document.getElementById('e-prog-hidden').value = triggerButton.getAttribute('data-prog') || 'No asignado';
+
+      document.getElementById('grado-actual-text').value = triggerButton.getAttribute('data-grado') || 'No asignado';
+      document.getElementById('e-grado-hidden').value = triggerButton.getAttribute('data-grado') || 'No asignado';
     });
 
-    // Auto-ocultar flash
+    // Cuando el usuario cambia una opción en los selects especiales, se actualiza el valor oculto
+    document.getElementById('apoyo-change-select').addEventListener('change', function() { if (this.value) { document.getElementById('apoyo-actual-text').value = this.value; document.getElementById('e-apoyo-hidden').value = this.value; } });
+    document.getElementById('atendido-change-select').addEventListener('change', function() { if (this.value) { document.getElementById('atendido-actual-text').value = this.value; document.getElementById('e-atendido-hidden').value = this.value; } });
+    document.getElementById('prog-change-select').addEventListener('change', function() { if (this.value) { document.getElementById('prog-actual-text').value = this.value; document.getElementById('e-prog-hidden').value = this.value; } });
+    document.getElementById('grado-change-select').addEventListener('change', function() { if (this.value) { document.getElementById('grado-actual-text').value = this.value; document.getElementById('e-grado-hidden').value = this.value; } });
+
+  }
+
+    // Script para el modal de Cambiar Estado
+    const estadoModal = document.getElementById('modalCambiarEstado');
+    if (estadoModal) {
+      estadoModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const id = button.getAttribute('data-id');
+        const nombre = button.getAttribute('data-nombre');
+        const estado = button.getAttribute('data-estado');
+
+        document.getElementById('estado-nino-nombre').textContent = nombre;
+        document.getElementById('edit-estado-select').value = estado;
+        document.getElementById('formCambiarEstado').action = `/postulaciones/estado/${id}`;
+      });
+    }
+
+    // Auto-ocultar las alertas (versión única y limpia)
     setTimeout(() => {
-      document.querySelectorAll('.alert').forEach(a => {
-        a.classList.remove('show'); a.classList.add('fade');
-        setTimeout(() => a.remove(), 400);
+      document.querySelectorAll('.alert').forEach(alertNode => {
+        new bootstrap.Alert(alertNode).close();
       });
     }, 4000);
 
-     // Script para el nuevo modal de Cambiar Estado
-          const estadoModal = document.getElementById('modalCambiarEstado');
-          if (estadoModal) {
-            estadoModal.addEventListener('show.bs.modal', function (event) {
-              const button = event.relatedTarget;
-              const id = button.getAttribute('data-id');
-              const nombre = button.getAttribute('data-nombre');
-              const estado = button.getAttribute('data-estado');
-              document.getElementById('estado-nino-nombre').textContent = nombre;
-              document.getElementById('edit-estado-select').value = estado;
-              document.getElementById('formCambiarEstado').action = `/postulaciones/estado/${id}`;
-            });
-          }
-
-          // Ocultar alertas
-          setTimeout(() => { document.querySelectorAll('.alert').forEach(a => new bootstrap.Alert(a).close()); }, 4000);
   </script>
+
 
 </body>
 </html>
