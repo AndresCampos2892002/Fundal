@@ -1,61 +1,149 @@
-/* --- ESTILO NAVBAR RECOMENDADO: NEUTRO Y PROFESIONAL --- */
+/* ==========================================================================
+   ESTILOS NAVBAR - AMARILLO FUNDAL CON EFECTOS
+   ========================================================================== */
 
-/* Contenedor principal de la barra */
-.navbar {
-  background-color: #f8f9fa; /* Un fondo gris muy claro, neutro y profesional */
-  padding: 0.75rem 2rem;
-  border-bottom: 1px solid #dee2e6; /* Borde estándar para separación */
+/* --- Variables --- */
+:root {
+  --navbar-bg: #ffffff; /* Fondo blanco */
+  --navbar-border: #e0e0e0; /* Borde ligeramente más visible */
+  --navbar-text-primary: #1a1a1a; /* Negro un poco más suave */
+  --navbar-text-secondary: #555555; /* Gris oscuro para texto secundario */
+  --navbar-accent: #FFEB3B; /* Amarillo FUNDAL */
+  --navbar-accent-dark: #FBC02D; /* Amarillo más oscuro/dorado para contraste */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --border-radius-pill: 50rem;
+  --transition-speed: 0.25s; /* Velocidad de transición */
 }
 
-/* Marca/Logo "FUNDAL" */
+/* --- Barra Principal --- */
+.navbar {
+  background-color: var(--navbar-bg);
+  padding: 0.75rem 2rem;
+  border-bottom: 1px solid var(--navbar-border);
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04); /* Sombra suave */
+  position: sticky;
+  top: 0;
+  z-index: 1020;
+}
+
+/* Marca/Logo */
 .navbar-brand {
   font-weight: 800;
   font-size: 1.5rem;
-  color: #212529 !important; /* Texto principal oscuro */
+  color: var(--navbar-text-primary) !important;
 }
 
-/* Enlaces de navegación */
+/* Enlaces de Navegación */
 .navbar-nav .nav-link {
-  color: #495057 !important; /* Texto secundario un poco más suave */
-  font-weight: 600;
-  margin: 0 0.25rem;
-  padding: 0.5rem 0.25rem;
-  position: relative;
-  transition: all 0.2s ease-in-out;
-  border-bottom: 2px solid transparent;
+  color: var(--navbar-text-secondary) !important;
+  font-weight: 500;
+  margin: 0 0.5rem;
+  padding: 0.6rem 0.75rem;
+  position: relative; /* Para el pseudo-elemento */
+  transition: color var(--transition-speed) ease;
+  border-radius: 6px; /* Bordes redondeados sutiles */
+  overflow: hidden; /* Para contener el efecto de fondo */
 }
 
-/* Efecto hover para los enlaces */
-.navbar-nav .nav-link:hover {
-  color: #000000 !important; /* Texto se vuelve negro al pasar el mouse */
+/* Efecto Hover/Focus en Enlaces - Fondo Amarillo */
+.navbar-nav .nav-link::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 0; /* Empieza con altura 0 */
+  background-color: var(--navbar-accent);
+  transition: height var(--transition-speed) ease;
+  z-index: -1; /* Detrás del texto */
+  border-radius: 6px 6px 0 0; /* Redondeado arriba */
 }
 
-/* Estilo para el enlace de la página ACTIVA: aquí usamos el acento amarillo */
+.navbar-nav .nav-link:hover::before,
+.navbar-nav .nav-link:focus::before {
+  height: 100%; /* El fondo amarillo crece desde abajo */
+}
+
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link:focus {
+  color: var(--navbar-text-primary) !important; /* Texto se vuelve más oscuro */
+}
+
+/* Estilo para Enlace ACTIVO */
 .navbar-nav .nav-link.active {
-  color: #212529 !important;
-  font-weight: 700;
-  border-bottom-color: #FFEB3B; /* La línea inferior es del color de tu marca */
+  color: var(--navbar-text-primary) !important;
+  font-weight: 600;
+  background-color: var(--navbar-accent); /* Fondo amarillo sólido */
 }
 
-/* Texto de bienvenida al usuario */
+.navbar-nav .nav-link.active:hover {
+  background-color: var(--navbar-accent-dark); /* Se oscurece al pasar el mouse */
+}
+
+
+/* Contenedor Usuario/Logout */
+.navbar-user-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Texto de Bienvenida */
 .navbar-text {
-  color: #6c757d; /* Color de texto silenciado estándar */
+  color: var(--navbar-text-secondary);
   font-size: 0.9rem;
 }
 
-/* Botón de Cerrar Sesión: el otro punto de acento amarillo */
-.btn-outline-light {
-  background-color: #FFEB3B;
-  color: #212529; /* Texto oscuro para contraste sobre amarillo */
-  border: none;
-  border-radius: 50rem;
-  font-weight: 700; /* Hacemos el texto más grueso */
-  padding: 0.5rem 1.25rem;
-  transition: all 0.2s ease;
+/* Botón Cerrar Sesión (Visible y con Efecto) */
+.btn-logout {
+  background-color: var(--navbar-text-primary); /* Fondo oscuro */
+  color: var(--navbar-accent); /* Texto amarillo */
+  border: 2px solid var(--navbar-text-primary); /* Borde oscuro */
+  border-radius: var(--border-radius-pill);
+  font-weight: 600;
+  padding: 0.5rem 1.3rem;
+  transition: all var(--transition-speed) ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.btn-outline-light:hover {
-  background-color: #facc15; /* Amarillo un poco más oscuro */
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+/* Efecto Hover/Focus para Logout */
+.btn-logout:hover,
+.btn-logout:focus {
+  background-color: var(--navbar-accent); /* Fondo cambia a amarillo */
+  color: var(--navbar-text-primary); /* Texto cambia a oscuro */
+  border-color: var(--navbar-accent); /* Borde amarillo */
+  transform: scale(1.05); /* Crece un poco */
+  box-shadow: 0 4px 15px rgba(255, 235, 59, 0.4); /* Resplandor amarillo */
+}
+
+.btn-logout i {
+  font-size: 1em;
+  transition: transform 0.3s ease;
+}
+.btn-logout:hover i {
+    transform: rotate(15deg); /* Ícono rota ligeramente */
+}
+/* Responsive (se mantiene igual) */
+.navbar-toggler { border: none; }
+.navbar-toggler:focus { box-shadow: none; }
+.navbar-toggler-icon { background
+
+/* Ajustes adicionales para pantallas pequeñas si es necesario */
+@media (max-width: 991px) {
+  .navbar-nav .nav-link {
+    margin: 0.5rem 0; /* Espaciado vertical en menú desplegado */
+    padding: 0.5rem 0;
+    border-bottom: none; /* Quitar borde inferior en móvil */
+  }
+  .navbar-nav .nav-link.active {
+     font-weight: 700;
+     color: var(--navbar-accent-dark) !important; /* Resaltar activo en móvil */
+  }
+  .navbar-user-section {
+    margin-top: 1rem; /* Separar sección de usuario en móvil */
+    width: 100%;
+    justify-content: space-between;
+  }
 }
